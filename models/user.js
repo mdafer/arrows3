@@ -7,5 +7,7 @@ module.exports.User = mongoose.model('User', new Schema({
 	firstName: { type: String },
 	lastName: { type: String },
 	email: { type: String, unique: true },
-	password: { type: String },
+	password: { type: String, require: true },
+	passwordResetToken: { type: String },
+	passwordResetExpire: { type: Date }
 }))

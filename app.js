@@ -4,6 +4,7 @@ var mongoose = require('mongoose')
 var csrf = require('csurf')
 var session = require('client-sessions')
 var express = require('express')
+var crypto = require('crypto')
 
 var middleware = require('./config/auth-middleware')
 var utils = require('./config/utils')
@@ -23,8 +24,8 @@ app.use(session({
 	duration: 60 * 60 * 1000,
 	activeDuration: 5 * 60 * 1000,
 }))
-app.use(csrf());
-app.use(middleware.authMiddleware);
+app.use(csrf())
+app.use(middleware.authMiddleware)
 
 /*
 	Routes
@@ -90,16 +91,98 @@ app.get('/login', function(req, res) {
 app.post('/login', function(req, res) {
 	userModel.User.findOne({ email: req.body.email }, 'firstName lastName email password', function(err, user) {
 	    if (!user) {
-	      res.render('login', { error: "Incorrect email / password.", csrfToken: req.csrfToken() });
+	      res.render('login', { error: "Incorrect email / password.", csrfToken: req.csrfToken() })
 	    } else {
 	      if (bcrypt.compareSync(req.body.password, user.password)) {
-	        utils.createUserSession(req, res, user);
-	        res.redirect('/dashboard');
+	        utils.createUserSession(req, res, user)
+	        res.redirect('/dashboard')
 	      } else {
-	        res.render('login', { error: "Incorrect email / password.", csrfToken: req.csrfToken() });
+	        res.render('login', { error: "Incorrect email / password.", csrfToken: req.csrfToken() })
 	      }
 	    }
-	  });
+	  })
+})
+
+// Render the forgot password page
+app.get('/forgot-password', function(req, res) {
+	res.render('forgot-password', {
+		csrfToken: req.csrfToken(),
+		error: '',
+		success: ''
+	})
+})
+
+// Send reset email
+app.post('/forgot-password', function(req, res) {
+	userModel.User.findOne({ email: req.body.email }, function(err, user) {
+		if(!user){
+			res.render('forgot-password', {
+				csrfToken: req.csrfToken(),
+				error: "User doesn't exists.",
+				success: ''
+			})
+		} else {
+			// Generate a random token for the user 
+			crypto.randomBytes(32, function(ex, buf) {
+			    var token = buf.toString('hex')
+			    user.passwordResetToken = token
+			    user.passwordResetExpire = Date.now() + 3600000
+			    user.save()
+			})
+
+			// TODO - send enail
+
+			res.render('forgot-password', {
+				csrfToken: req.csrfToken(),
+				error: '',
+				success: 'An email has been sent to ' + req.body.email
+			})
+		}
+	})
+})
+
+// Render the reset password page
+app.get('/reset-password/:token', function(req, res) {
+	userModel.User.findOne({ passwordResetToken: req.params.token, passwordResetExpire: { $gt: Date.now() } }, function(err, user) {
+    if (!user) {
+      res.redirect('/forgot-password')
+    } else {
+	    res.render('reset-password', {
+	      csrfToken: req.csrfToken(),
+	      error: '',
+	      success: ''
+	    })
+	  }
+  })
+})
+
+// Reset user password
+app.post('/reset-password/:token', function(req, res) {
+	userModel.User.findOne({ passwordResetToken: req.params.token, passwordResetExpire: { $gt: Date.now() } }, function(err, user) {
+    if (!user) {
+      res.redirect('/forgot-password')
+    } else {
+    	if(req.body.password === req.body.password1) {
+    		var salt = bcrypt.genSaltSync(10)
+    		var hash = bcrypt.hashSync(req.body.password, salt)
+
+    		user.password = hash
+        user.passwordResetToken = undefined
+        user.passwordResetExpire = undefined
+        user.save()
+
+        // TODO - send enail
+
+		    res.redirect('/login')
+		  } else {
+		  	res.render('reset-password', {
+		  	  csrfToken: req.csrfToken(),
+		  	  error: "Password doesn't match.",
+		  	  success: ''
+		  	})
+		  }
+	  }
+  })
 })
 
 // Log out the user
@@ -110,4 +193,4 @@ app.get('/logout', function(req, res) {
 	res.redirect('/')
 })
 
-app.listen(3000);
+app.listen(3000)
