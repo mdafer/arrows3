@@ -52,39 +52,76 @@ app.get('/profile', function(req, res) {
 
 // Update profile
 app.post('/profile', function(req, res) {
+	var error = ''
+	if(req.body.password1 != req.body.password2){
+		error = "New Password doesn't match."
+	}
+	if(req.body.password1 && !error) {
+		error = utils.checkPassword(req.body.password1)
+	}
+	if(error){
+		res.render('profile', {
+		  csrfToken: req.csrfToken(),
+		  error: error,
+		  success: ''
+		})
+		return
+	}
 	userModel.User.findOne({ email: req.user.email }, 'firstName lastName email password', function(err, user) {
-		var error = ''
-		var success = ''
+		if(bcrypt.compareSync(req.body.password, user.password)) {
+			if(req.user.email === req.body.email) {
+				user.firstName = req.body.firstName
+				user.lastName = req.body.lastName
+				if(req.body.password1){
+					var salt = bcrypt.genSaltSync(10)
+					var hash = bcrypt.hashSync(req.body.password1, salt)
+					user.password = hash
+				}
+				user.save()
 
-		if(req.user.email === req.body.email) {
-			user.firstName = req.body.firstName
-			user.lastName = req.body.lastName
-			user.save()
+				utils.createUserSession(req, res, user)
+				res.render('profile', {
+					csrfToken: req.csrfToken(),
+					error: '',
+					success: 'Your profile has been successfully updated'
+				})
+			} else {
+				// Check if the new email is not already used
+				userModel.User.findOne({ email: req.body.email }, 'email', function(err, usr) {
+				  if(usr) {
+				  	res.render('profile', {
+				  		csrfToken: req.csrfToken(),
+				  		error: 'Email already used',
+				  		success: ''
+				  	})
+				  } else {
+				  	user.email = req.body.email
+				  	user.firstName = req.body.firstName
+				  	user.lastName = req.body.lastName
+				  	if(req.body.password1){
+				  		var salt = bcrypt.genSaltSync(10)
+				  		var hash = bcrypt.hashSync(req.body.password1, salt)
+				  		user.password = hash
+				  	}
+				  	user.save()
 
-			utils.createUserSession(req, res, user)
-			success = 'Your profile has been successfully updated'
+				  	utils.createUserSession(req, res, user)
+				  	res.render('profile', {
+				  		csrfToken: req.csrfToken(),
+				  		error: '',
+				  		success: 'Your profile has been successfully updated'
+				  	})
+				  }
+				})
+			}
 		} else {
-			// Check if the new email is not already used
-			userModel.User.findOne({ email: req.body.email }, 'email', function(err, usr) {
-			  if (usr) {
-			    error: 'Email already used'
-			  } else {
-			  	user.email = req.body.email
-			  	user.firstName = req.body.firstName
-			  	user.lastName = req.body.lastName
-			  	user.save()
-
-			  	utils.createUserSession(req, res, user)
-			  	success = 'Your profile has been successfully updated'
-			  }
+			error = "Current password doesn't match"
+			res.render('profile', {
+				csrfToken: req.csrfToken(),
+				error: "Current password doesn't match",
+				success: ''
 			})
 		}
-
-		res.render('profile', {
-			csrfToken: req.csrfToken(),
-			error: error,
-			success: success
-		})
 	})
 })
 
@@ -98,6 +135,14 @@ app.get('/register', function(req, res) {
 
 // Create a new user
 app.post('/register', function(req, res) {
+	var error = utils.checkPassword(req.body.password)
+	if(error){
+		res.render('register', {
+		  csrfToken: req.csrfToken(),
+		  error: error
+		})
+		return
+	}
 	var salt = bcrypt.genSaltSync(10)
 	var hash = bcrypt.hashSync(req.body.password, salt)
 
@@ -113,7 +158,7 @@ app.post('/register', function(req, res) {
 			if(err.code === 11000) {
 				error = "This email is already taken."
 			}
-			
+
 			res.render('register', {
 				csrfToken: req.csrfToken(),
 				error: error
@@ -194,8 +239,7 @@ app.get('/reset-password/:token', function(req, res) {
     } else {
 	    res.render('reset-password', {
 	      csrfToken: req.csrfToken(),
-	      error: '',
-	      success: ''
+	      error: ''
 	    })
 	  }
   })
@@ -203,29 +247,33 @@ app.get('/reset-password/:token', function(req, res) {
 
 // Reset user password
 app.post('/reset-password/:token', function(req, res) {
+	var error = utils.checkPassword(req.body.password)
+	if(!error && req.body.password != req.body.password1){
+		error = "Password doesn't match."
+	}
+	if(error){
+		res.render('reset-password', {
+		  csrfToken: req.csrfToken(),
+		  error: error
+		})
+		return
+	}
+
 	userModel.User.findOne({ passwordResetToken: req.params.token, passwordResetExpire: { $gt: Date.now() } }, function(err, user) {
     if (!user) {
       res.redirect('/forgot-password')
     } else {
-    	if(req.body.password === req.body.password1) {
-    		var salt = bcrypt.genSaltSync(10)
-    		var hash = bcrypt.hashSync(req.body.password, salt)
+    	var salt = bcrypt.genSaltSync(10)
+    	var hash = bcrypt.hashSync(req.body.password, salt)
 
-    		user.password = hash
-        user.passwordResetToken = undefined
-        user.passwordResetExpire = undefined
-        user.save()
+    	user.password = hash
+      user.passwordResetToken = undefined
+      user.passwordResetExpire = undefined
+      user.save()
 
-        // TODO - send email
+      // TODO - send email
 
-		    res.redirect('/login')
-		  } else {
-		  	res.render('reset-password', {
-		  	  csrfToken: req.csrfToken(),
-		  	  error: "Password doesn't match.",
-		  	  success: ''
-		  	})
-		  }
+		  res.redirect('/login')
 	  }
   })
 })
