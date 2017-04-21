@@ -41,6 +41,53 @@ app.get('/dashboard', utils.requireLogin, function(req, res) {
 	res.render('dashboard')
 })
 
+// Render the profile page
+app.get('/profile', function(req, res) {
+	res.render('profile', {
+		csrfToken: req.csrfToken(),
+		error: '',
+		success: ''
+	})
+})
+
+// Update profile
+app.post('/profile', function(req, res) {
+	userModel.User.findOne({ email: req.user.email }, 'firstName lastName email password', function(err, user) {
+		var error = ''
+		var success = ''
+
+		if(req.user.email === req.body.email) {
+			user.firstName = req.body.firstName
+			user.lastName = req.body.lastName
+			user.save()
+
+			utils.createUserSession(req, res, user)
+			success = 'Your profile has been successfully updated'
+		} else {
+			// Check if the new email is not already used
+			userModel.User.findOne({ email: req.body.email }, 'email', function(err, usr) {
+			  if (usr) {
+			    error: 'Email already used'
+			  } else {
+			  	user.email = req.body.email
+			  	user.firstName = req.body.firstName
+			  	user.lastName = req.body.lastName
+			  	user.save()
+
+			  	utils.createUserSession(req, res, user)
+			  	success = 'Your profile has been successfully updated'
+			  }
+			})
+		}
+
+		res.render('profile', {
+			csrfToken: req.csrfToken(),
+			error: error,
+			success: success
+		})
+	})
+})
+
 // Render the registration page
 app.get('/register', function(req, res) {
 	res.render('register', {
@@ -62,12 +109,11 @@ app.post('/register', function(req, res) {
 	})
 	user.save(function(err) {
 		if(err) {
-			var error = 'Something went wrong.'
-
+			error = 'Something went wrong.'
 			if(err.code === 11000) {
 				error = "This email is already taken."
 			}
-
+			
 			res.render('register', {
 				csrfToken: req.csrfToken(),
 				error: error
@@ -115,12 +161,10 @@ app.get('/forgot-password', function(req, res) {
 // Send reset email
 app.post('/forgot-password', function(req, res) {
 	userModel.User.findOne({ email: req.body.email }, function(err, user) {
+		var error = ''
+		var success = ''
 		if(!user){
-			res.render('forgot-password', {
-				csrfToken: req.csrfToken(),
-				error: "User doesn't exists.",
-				success: ''
-			})
+			error = "User doesn't exists."
 		} else {
 			// Generate a random token for the user 
 			crypto.randomBytes(32, function(ex, buf) {
@@ -130,14 +174,15 @@ app.post('/forgot-password', function(req, res) {
 			    user.save()
 			})
 
-			// TODO - send enail
+			// TODO - send email
 
-			res.render('forgot-password', {
-				csrfToken: req.csrfToken(),
-				error: '',
-				success: 'An email has been sent to ' + req.body.email
-			})
+			success = 'An email has been sent to ' + req.body.email
 		}
+		res.render('forgot-password', {
+			csrfToken: req.csrfToken(),
+			error: error,
+			success: success
+		})
 	})
 })
 
@@ -171,7 +216,7 @@ app.post('/reset-password/:token', function(req, res) {
         user.passwordResetExpire = undefined
         user.save()
 
-        // TODO - send enail
+        // TODO - send email
 
 		    res.redirect('/login')
 		  } else {

@@ -10,11 +10,11 @@ module.exports.createUserSession = function(req, res, user) {
 
 	req.session.user = user
 	req.user = user
-	//req.locals.user = user
+	req.app.locals.user = user
 }
 
 // Check if user is logged in
-module.exports.requireLogin = function(req, res, user, next){
+module.exports.requireLogin = function(req, res, next){
 	if(!req.user) {
 		res.redirect('/login')
 	} else {
@@ -23,3 +23,10 @@ module.exports.requireLogin = function(req, res, user, next){
 }
 
 
+// Password policy
+module.exports.checkPassword = function(password) {
+	if(password.length < 8){
+		return 'The password must be at least 8 characters.'
+	}
+	return ''
+}
