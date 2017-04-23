@@ -1,0 +1,17 @@
+#diagrams {
+	padding: 20px;
+}
+
+.mb-2 {
+	margin-bottom: 20px;
+}
+
+@media (min-width: 768px) { 
+	#diagrams {
+		min-width: 500px;
+	}
+
+	.right {
+		float: right;
+	}
+}

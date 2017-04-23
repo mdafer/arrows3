@@ -9,40 +9,77 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" >Diagram title</a>
+        <a class="navbar-brand" ><%= diagram.meta.title %></a>
       </div>
       <div id="navbar" class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Diagrams <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                Diagrams
+              <ul id="diagrams" class="dropdown-menu">
+                <div class="row mb-2">
+                  <div class="col-sm-8">
+                    <div class="input-group">
+                      <span class="input-group-addon" id="search">Search</span>
+                      <input type="text" class="form-control"  aria-describedby="search">
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <form action="/dashboard/add-diagram" method="POST" role="form"> 
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">                   
+                      <button type="submit" class="btn btn-primary">New Diagram</button>
+                    </form>
+                  </div>
+                </div>
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Created</th>
+                      <th>Updated</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for (i in diagrams) {%>
+                      <tr onclick="changeDiagram('<%= diagrams[i]._id %>')">
+                        <td><%= diagrams[i].meta.title %></td>
+                        <td><%= diagrams[i].meta.created.toLocaleString() %></td>
+                        <td><%= diagrams[i].meta.lastUpdate.toLocaleString() %></td>
+                        <% if (diagrams.length > 1) {%>
+                          <td><button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></td>
+                        <% } %>  
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </table>
               </ul>
           </li>
         </ul>
-        <ul class="nav navbar-nav pull-right">
+        <ul class="nav navbar-nav right">
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Import <span class="caret"></span></a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu dropdown-menu-right">
                 Import
               </ul>
           </li>
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Export <span class="caret"></span></a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu dropdown-menu-right">
                 Export
               </ul>
           </li>
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Settings <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="profile">Profile</a></li>
-                <li><a href="logout">Logout</a></li>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
               </ul>
           </li>
         </ul>
       </div><!--/.nav-collapse -->
     </div>
   </nav>
+
+  <script src="/javascripts/dashboard.js"></script>
 
 <% include footer %>

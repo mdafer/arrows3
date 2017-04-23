@@ -4,7 +4,7 @@ var utils = require('./utils')
 // authentication middleware
 module.exports.authMiddleware = function(req, res, next) {
   if (req.session && req.session.user) {
-    userModel.User.findOne({ email: req.session.user.email }, 'firstName lastName email', function(err, user) {
+    userModel.User.findOne({ email: req.session.user.email }, '_id firstName lastName email', function(err, user) {
       if (user) {
         utils.createUserSession(req, res, user);
       }
@@ -14,3 +14,12 @@ module.exports.authMiddleware = function(req, res, next) {
     next();
   }
 };
+
+// Check if user is logged in
+module.exports.requireLogin = function(req, res, next){
+  if(!req.user) {
+    res.redirect('/login')
+  } else {
+    next()
+  }
+}
