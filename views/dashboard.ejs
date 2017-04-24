@@ -15,7 +15,7 @@
         <ul class="nav navbar-nav">
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Diagrams <span class="caret"></span></a>
-              <ul id="diagrams" class="dropdown-menu">
+              <ul id="diagrams" class="dropdown-menu pd-2">
                 <div class="row mb-2">
                   <div class="col-sm-8">
                     <div class="input-group">
@@ -58,14 +58,35 @@
         <ul class="nav navbar-nav right">
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Import <span class="caret"></span></a>
-              <ul class="dropdown-menu dropdown-menu-right">
-                Import
+              <ul id="import" class="dropdown-menu dropdown-menu-right pd-2">
+                <div class="input-group mb-2">
+                  <select class="form-control">
+                    <option>CSV: Nodes</option>
+                  </select>
+                  <div class="input-group-btn">
+                    <button type="button" class="btn btn-default">Download Sample</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <input type="file" id="exampleInputFile" onchange="importCSVNodes()">
+                  <p class="help-block"><small>Note: file must be formatted properly for import to work.</small></p>
+                </div>
+                <div id="importError" class="alert alert-danger" hidden>
+                  Wrong data format.
+                </div>
+                <div id="importForm" class="form-group" hidden>
+                  <a type="button" class="btn btn-primary pull-right">Import</a>
+                </div>
               </ul>
           </li>
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Export <span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-right">
-                Export
+                <li><a href="export?type=cypher&diagram=<%= diagram._id %>">Cypher</a></li>
+                <li><a href="export?type=csvn&diagram=<%= diagram._id %>">CSV: Nodes</a></li>
+                <li><a href="export?type=csvr&diagram=<%= diagram._id %>">CSV: Relationships</a></li>
+                <li><a href="export?type=markup&diagram=<%= diagram._id %>">Markup</a></li>
+                <li><a onclick="exportSVG()">SVG</a></li>
               </ul>
           </li>
           <li class="dropdown">
@@ -79,7 +100,5 @@
       </div><!--/.nav-collapse -->
     </div>
   </nav>
-
-  <script src="/javascripts/dashboard.js"></script>
 
 <% include footer %>

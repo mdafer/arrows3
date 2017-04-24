@@ -1,4 +1,4 @@
-#diagrams {
+.pd-2 {
 	padding: 20px;
 }
 
@@ -9,6 +9,10 @@
 @media (min-width: 768px) { 
 	#diagrams {
 		min-width: 500px;
+	}
+
+	#import {
+		min-width: 250px;
 	}
 
 	.right {

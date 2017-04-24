@@ -35,6 +35,8 @@ app.get('/', main.view)
 app.get('/dashboard', middleware.requireLogin, dashboard.view), 
 app.get('/dashboard/:id', middleware.requireLogin, dashboard.diagram)
 app.post('/dashboard/add-diagram', middleware.requireLogin, dashboard.addDiagram)
+app.post('/dashboard/import', middleware.requireLogin, dashboard.import)
+app.get('/dashboard/export', middleware.requireLogin, dashboard.export)
 
 // Profile
 app.get('/profile', profile.view)

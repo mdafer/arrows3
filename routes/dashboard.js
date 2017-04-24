@@ -1,5 +1,6 @@
 var diagramModel = require('../models/diagram')
 var userModel = require('../models/user')
+var exportData = require('../config/export') 
 
 // Redirect to diagram
 module.exports.view = function(req, res, next) {
@@ -41,5 +42,30 @@ module.exports.addDiagram = function(req, res, next) {
 	diagram.history.push(diagram.data)
 	diagram.save(function(err){
 		res.redirect('/dashboard/' + diagram._id)
+	})
+}
+
+// Import diagram
+module.exports.import = function(req, res, next) {
+	next()
+}
+
+// Export diagram
+module.exports.export = function(req, res, next) {
+	diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, function(err, diagram) {
+		if(diagram){
+			var type = req.query.type
+			if(type in exportData){
+				var data = exportData[type](diagram.data)
+				res.render('export', {
+					data: data,
+					type: req.query.type,
+				})
+			} else {
+				next()
+			}
+		} else {
+			next()
+		}		
 	})
 }

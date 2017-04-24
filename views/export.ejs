@@ -1,0 +1,25 @@
+<% include header %>
+<div class="container">
+	<div class="row">
+		<div class="page-header">
+		  <h1>Export: <small> <%= type %></small></h1>
+		</div>
+	</div>
+	<figure class="highlight">
+		<pre><code id="code" class="language-html" data-lang="html"><%= data %></code></pre>
+	</figure>
+	<% if (type == 'cypher') { 
+		var cypher = "CREATE \n  " + data.join(", ")
+		var url = "http://console.neo4j.org?init="
+		+ encodeURIComponent(cypher)
+		+ "&query="
+	  + encodeURIComponent("start n=node(*) return n")
+	%>
+		<a href="<%= url%>" target="_blank" type="button" class="btn btn-default pull-right">Open in console</a>   
+	<% } else if (type == 'csvn' || type == 'csvr') { %>
+		<a id="csv" href="" download="nodes.csv" type="button" class="btn btn-default pull-right">Download</a> 
+	<% } %>	
+</div>
+
+<script src="/javascripts/export.js"></script>
+<% include footer %>
