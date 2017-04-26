@@ -1,5 +1,5 @@
-var mongoose = require('mongoose')
-var Schema = mongoose.Schema
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
 // User model
 module.exports.User = mongoose.model('User', new Schema({
@@ -14,4 +14,4 @@ module.exports.User = mongoose.model('User', new Schema({
 		asc: { type: Boolean, default: true },
 		col: { type: String, default: 'title' }
 	}
-}))
+}));

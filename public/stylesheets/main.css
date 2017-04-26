@@ -1,21 +1,21 @@
 .pd-2 {
-	padding: 20px;
+    padding: 20px;
 }
 
 .mb-2 {
-	margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 @media (min-width: 768px) { 
-	#diagrams {
-		min-width: 500px;
-	}
+    #diagrams {
+        min-width: 500px;
+    }
 
-	#import {
-		min-width: 250px;
-	}
+    #import {
+        min-width: 250px;
+    }
 
-	.right {
-		float: right;
-	}
+    .right {
+        float: right;
+    }
 }

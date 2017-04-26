@@ -1,5 +1,5 @@
-var mongoose = require('mongoose')
-var Schema = mongoose.Schema
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
 // Diagram model
 module.exports.Diagram = mongoose.model('Diagram', new Schema({
@@ -15,7 +15,7 @@ module.exports.Diagram = mongoose.model('Diagram', new Schema({
 		title: { type: String, default: 'My new diagram'}
 	},
 	user: { type: Schema.Types.ObjectId, ref: 'User' }
-}))
+}));
 
 // Node object
 module.exports.Node = function(){
@@ -36,10 +36,10 @@ module.exports.Node = function(){
 		},
 		x: 100,
 		y: 100
-	}
+	};
 
-	return node
-}
+	return node;
+};
 
 // Relationship object
 module.exports.Relationship = function(){
@@ -56,7 +56,7 @@ module.exports.Relationship = function(){
 		},
 		type: "" 
 
-	}
+	};
 
-	return relationships
-}
+	return relationships;
+};

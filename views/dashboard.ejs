@@ -58,23 +58,21 @@
         <ul class="nav navbar-nav right">
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Import <span class="caret"></span></a>
-              <ul id="import" class="dropdown-menu dropdown-menu-right pd-2">
+              <ul id="import" class="dropdown-menu dropdown-menu-right pd-2" onclick="event.stopPropagation();">
                 <div class="input-group mb-2">
-                  <select class="form-control">
+                  <select id="sampleType" class="form-control">
                     <option>CSV: Nodes</option>
                   </select>
                   <div class="input-group-btn">
-                    <button type="button" class="btn btn-default">Download Sample</button>
+                    <button id="getSample" type="button" class="btn btn-default">Download Sample</button>
                   </div>
                 </div>
                 <div class="form-group">
                   <input type="file" id="exampleInputFile" onchange="importCSVNodes()">
                   <p class="help-block"><small>Note: file must be formatted properly for import to work.</small></p>
                 </div>
-                <div id="importError" class="alert alert-danger" hidden>
-                  Wrong data format.
-                </div>
-                <div id="importForm" class="form-group" hidden>
+                <div id="importError" class="alert alert-danger" hidden></div>
+                <div id="importBtn" class="form-group" hidden>
                   <a type="button" class="btn btn-primary pull-right">Import</a>
                 </div>
               </ul>
