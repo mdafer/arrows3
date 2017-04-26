@@ -1,3 +1,5 @@
+var diagramId = $("#diagram").attr("meta");
+
 // Insert the CSRF token
 var csrftoken = $("input[name='_csrf']").val();
 $.ajaxSetup({
@@ -10,14 +12,6 @@ $.ajaxSetup({
 
 function changeDiagram(diagram){
   window.location.href = diagram;
-}
-
-function exportSVG(){
-    var svg = document.getElementsByTagName("svg");
-    if(svg){
-        var rawSvg = new XMLSerializer().serializeToString(svg[0]);
-        window.open( "data:image/svg+xmlbase64," + btoa(rawSvg) );
-    }
 }
 
 function importCSVNodes(){
@@ -130,3 +124,41 @@ $("#getSample").on('click', function() {
         }
     });
 });
+
+
+// Export SVG
+$("#exportSVG").on("click", function(){
+    var svg = document.getElementsByTagName("svg");
+    if(svg){
+        var rawSvg = new XMLSerializer().serializeToString(svg[0]);
+        window.open( "data:image/svg+xmlbase64," + btoa(rawSvg) );
+    }
+});
+
+// Change diagram title
+$("#updateTitle").on("click", function(){
+    var title = $("#newDiagramTitle").val();
+    var modalError = $("#mainModalError");
+    if(title){
+        var url = "update-title?title=" + title + "&diagram=" + diagramId;
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                title: title
+            },
+            dataType: "json",
+            success: function(success){
+                $("#diagramTitle").html(title);
+                $('#mainModal').modal('hide');
+                modalError.attr("hidden", true);
+            },
+            error: function(err){
+                modalError.html(err.responseJSON.error);
+                modalError.removeAttr("hidden");
+            }
+        });
+    }
+});
+
+

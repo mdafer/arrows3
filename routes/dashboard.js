@@ -15,23 +15,22 @@ module.exports.view = function(req, res, next) {
     });
 };
 
-// Render the diagram page
-module.exports.diagram = function(req, res, next) {
-    diagramModel.Diagram.findOne({ _id: req.params.id, user: req.session.user._id}, function(err, diagram) {
-        if(diagram){
-            diagramModel.Diagram.find({ user: req.session.user._id }, function(err, diagrams) {
-                userModel.User.findByIdAndUpdate(req.session.user._id, { $set: { "currentDiagram": diagram._id }}, { new: true }, function(err) {
-                    res.render('dashboard', {
-                        csrfToken: req.csrfToken(),
-                        diagram: diagram,
-                        diagrams: diagrams
-                    });
+// Update diagram title
+module.exports.updateTitle = function(req, res) {
+    if(req.query.title && req.query.diagram){
+        diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'meta', function(err, diagram) {
+            if(diagram){
+                diagram.meta.title = req.query.title;
+                diagram.save(function(err) {
+                    res.json(200, { success: "Title successfully updated." });
                 });
-            });
-        } else {
-            next();
-        }
-    });
+            } else {
+                res.json(404, { error: 'Diagram not found.' });
+            }
+        });
+    } else {
+        res.json(403, { error: 'Parameters are missing' });
+    }
 };
 
 // Add new diagram
@@ -79,21 +78,22 @@ module.exports.import = function(req, res, next) {
             res.json(200, { diagram: diagram._id });
         });
     } else {
-        res.json(403, { error: 'Something went wrong.' });
+        res.json(403, { error: 'Parameters are missing' });
     }
 };
 
+// Returns sample object schema for csv
 module.exports.sample = function(req, res, next){
     if(req.query.type === 'nodes'){
         var data = {
             nodes: [diagramModel.Node()]
-        }
+        };
         var sample = exportData.csvn(data);
         res.json(200, { sample: sample });
     } else {
         next();
     }
-}
+};
 
 // Export diagram
 module.exports.export = function(req, res, next) {
@@ -109,6 +109,25 @@ module.exports.export = function(req, res, next) {
             } else {
                 next();
             }
+        } else {
+            next();
+        }
+    });
+};
+
+// Render the diagram page
+module.exports.diagram = function(req, res, next) {
+    diagramModel.Diagram.findOne({ _id: req.params.id, user: req.session.user._id}, function(err, diagram) {
+        if(diagram){
+            diagramModel.Diagram.find({ user: req.session.user._id }, function(err, diagrams) {
+                userModel.User.findByIdAndUpdate(req.session.user._id, { $set: { "currentDiagram": diagram._id }}, { new: true }, function(err) {
+                    res.render('dashboard', {
+                        csrfToken: req.csrfToken(),
+                        diagram: diagram,
+                        diagrams: diagrams
+                    });
+                });
+            });
         } else {
             next();
         }
