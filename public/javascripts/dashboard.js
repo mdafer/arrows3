@@ -1,6 +1,6 @@
 var diagramId = $("#diagram").attr("meta");
 
-// Insert the CSRF token
+// Set the CSRF token
 var csrftoken = $("input[name='_csrf']").val();
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -10,9 +10,69 @@ $.ajaxSetup({
     }
 });
 
+// Update diagram title
+function updateTitle(title, diagram){
+    var modalError = $("#mainModalError");
+    if(title && diagram){
+        var url = "update-title?title=" + title + "&diagram=" + diagram;
+        $.ajax({
+            type: "PUT",
+            url: url,
+            dataType: "json",
+            success: function(success){
+                $("#diagramTitle").html(title);
+                $("#" + diagram + " td:first-child").html(title);
+                $('#mainModal').modal('hide');
+                modalError.attr("hidden", true);
+           },
+            error: function(err){
+                modalError.html(err.responseJSON.error);
+                modalError.removeAttr("hidden");
+            }
+        });
+    } 
+}
+$("#updateTitle").on("click", function(){
+    var title = $("#newDiagramTitle").val();
+    updateTitle(title, diagramId); 
+});
+
+// Change diagram
 function changeDiagram(diagram){
   window.location.href = diagram;
 }
+$(".change-diagram").on("click", function(){
+    var diagram = $(this).attr("id");
+    changeDiagram(diagram);
+});
+
+// Delete diagram
+function deleteDiagram(diagram, currentDiagram){
+    if(diagram){
+        $.ajax({
+            type: "DELETE",
+            url: 'delete-diagram?diagram=' + diagram,
+            dataType: "json",
+            success: function(success){
+                $("#" + diagram).remove();
+                if(diagram === currentDiagram){
+                    var d = $("#diagrams table tbody tr:first-child");
+                    if(d) {
+                        changeDiagram(d.attr("id"));
+                    }
+                }
+           },
+            error: function(err){
+                //
+            }
+        });
+    }
+}
+$(".delete-diagram").on("click", function(){
+    event.stopPropagation();
+    var diagram = $(this).parent().parent().attr("id");
+    deleteDiagram(diagram, diagramId);
+});
 
 function importCSVNodes(){
     var files = event.target.files;
@@ -99,9 +159,7 @@ function parseCSV(data) {
 }
 
 // Get import sample
-$("#getSample").on('click', function() {
-    var type = $("#sampleType").val();
-    type = type === "CSV: Nodes" ? "nodes" : type;
+function getSample(type) {
     $.ajax({
         type: "GET",
         url: "sample?type=" + type,
@@ -123,42 +181,26 @@ $("#getSample").on('click', function() {
             importError.removeAttr("hidden");
         }
     });
+}
+$("#getSample").on('click', function() {
+    var type = $("#sampleType").val();
+    type = type === "CSV: Nodes" ? "nodes" : type;
+    getSample(type);
 });
 
 
 // Export SVG
-$("#exportSVG").on("click", function(){
-    var svg = document.getElementsByTagName("svg");
+function exportSVG(svg){
     if(svg){
-        var rawSvg = new XMLSerializer().serializeToString(svg[0]);
+        var rawSvg = new XMLSerializer().serializeToString(svg);
         window.open( "data:image/svg+xmlbase64," + btoa(rawSvg) );
     }
+}
+$("#exportSVG").on("click", function(){
+    var svg = document.getElementsByTagName("svg");
+    exportSVG(svg[0]);
 });
 
-// Change diagram title
-$("#updateTitle").on("click", function(){
-    var title = $("#newDiagramTitle").val();
-    var modalError = $("#mainModalError");
-    if(title){
-        var url = "update-title?title=" + title + "&diagram=" + diagramId;
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: {
-                title: title
-            },
-            dataType: "json",
-            success: function(success){
-                $("#diagramTitle").html(title);
-                $('#mainModal').modal('hide');
-                modalError.attr("hidden", true);
-            },
-            error: function(err){
-                modalError.html(err.responseJSON.error);
-                modalError.removeAttr("hidden");
-            }
-        });
-    }
-});
+
 
 

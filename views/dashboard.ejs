@@ -41,12 +41,12 @@
                   </thead>
                   <tbody>
                     <% for (i in diagrams) {%>
-                      <tr onclick="changeDiagram('<%= diagrams[i]._id %>')">
+                      <tr id="<%= diagrams[i]._id %>" class="change-diagram">
                         <td><%= diagrams[i].meta.title %></td>
                         <td><%= diagrams[i].meta.created.toLocaleString() %></td>
                         <td><%= diagrams[i].meta.lastUpdate.toLocaleString() %></td>
                         <% if (diagrams.length > 1) {%>
-                          <td><button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></td>
+                          <td><button type="button" class="close delete-diagram" aria-label="Close"><span aria-hidden="true">&times;</span></button></td>
                         <% } %>  
                       </tr>
                     <% } %>

@@ -44,6 +44,21 @@ module.exports.addDiagram = function(req, res) {
     });
 };
 
+// Delete diagram
+module.exports.deleteDiagram = function(req, res) {
+    if(req.query.diagram){
+        diagramModel.Diagram.deleteOne({ _id: req.query.diagram, user: req.session.user._id }, function(err) {
+            if(err){
+                res.json(404, { error: err });
+            } else {
+                res.json(200, { success: "Diagram successfully deleted." });
+            }
+        });
+    } else {
+        res.json(403, { error: 'Parameters are missing' });
+    }
+};
+
 // Import diagram
 module.exports.import = function(req, res, next) {
     if(req.body.nodes){

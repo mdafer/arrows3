@@ -33,8 +33,9 @@ app.get('/', main.view);
 
 // Dashboard
 app.get('/dashboard', middleware.requireLogin, dashboard.view);
-app.post('/dashboard/update-title', middleware.requireLogin, dashboard.updateTitle);
+app.put('/dashboard/update-title', middleware.requireLogin, dashboard.updateTitle);
 app.post('/dashboard/add-diagram', middleware.requireLogin, dashboard.addDiagram);
+app.delete('/dashboard/delete-diagram', middleware.requireLogin, dashboard.deleteDiagram);
 app.post('/dashboard/import', middleware.requireLogin, dashboard.import);
 app.get('/dashboard/sample', middleware.requireLogin, dashboard.sample);
 app.get('/dashboard/export', middleware.requireLogin, dashboard.export);
