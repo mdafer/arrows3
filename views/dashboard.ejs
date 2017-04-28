@@ -99,7 +99,7 @@
     </div>
   </nav>
 
-  <div id="diagram" meta="<%= diagram._id %>"></div>
+  <div id="diagram"></div>
 
   <!-- Modal -->
   <div class="modal fade" id="mainModal" tabindex="-1" role="dialog" aria-labelledby="mainModalLabel">
@@ -121,4 +121,7 @@
       </div>
     </div>
   </div>
+  <script>
+    var diagramObj = <%- JSON.stringify(diagram) %>
+  </script>
 <% include footer %>

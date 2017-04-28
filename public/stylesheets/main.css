@@ -1,9 +1,25 @@
+html, body {
+    width: 100%;
+    height: 100%;
+}
 .pd-2 {
     padding: 20px;
 }
 
 .mb-2 {
     margin-bottom: 20px;
+}
+
+#diagram {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100% - 51px);
+}
+#diagram svg {
+    height: 100%;
+    width: 100%;
 }
 
 @media (min-width: 768px) { 

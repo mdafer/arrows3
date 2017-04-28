@@ -32,7 +32,7 @@ module.exports.Node = function(){
 			color: "black",
 			fill: "white",
 			stroke: "#333333",
-			strokeWdidth: 4
+			strokeWidth: 4
 		},
 		x: 100,
 		y: 100

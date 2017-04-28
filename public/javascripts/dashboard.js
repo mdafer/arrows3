@@ -1,5 +1,3 @@
-var diagramId = $("#diagram").attr("meta");
-
 // Set the CSRF token
 var csrftoken = $("input[name='_csrf']").val();
 $.ajaxSetup({
@@ -34,7 +32,7 @@ function updateTitle(title, diagram){
 }
 $("#updateTitle").on("click", function(){
     var title = $("#newDiagramTitle").val();
-    updateTitle(title, diagramId); 
+    updateTitle(title, diagramObj._id); 
 });
 
 // Change diagram
@@ -71,7 +69,7 @@ function deleteDiagram(diagram, currentDiagram){
 $(".delete-diagram").on("click", function(){
     event.stopPropagation();
     var diagram = $(this).parent().parent().attr("id");
-    deleteDiagram(diagram, diagramId);
+    deleteDiagram(diagram, diagramObj._id);
 });
 
 function importCSVNodes(){
