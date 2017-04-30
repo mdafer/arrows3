@@ -99,6 +99,18 @@
     </div>
   </nav>
 
+  <ul class="nav nav-pills nav-stacked" style="position: fixed; z-index: 100; top: 60px; left:0;">
+    <li id="addNode" role="presentation" id="tools">
+      <a><strong>Add node</strong></a>
+    </li>
+    <li id="addRelationship">
+      <a><strong>Add rel</strong></a>
+    </li>
+    <li id="deleteElement">
+      <a><strong>Delete element</strong></a>
+    </li>
+  </ul>
+
   <div id="diagram"></div>
 
   <!-- Modal -->
@@ -123,5 +135,6 @@
   </div>
   <script>
     var diagramObj = <%- JSON.stringify(diagram) %>
+    var mirrorNode = <%- JSON.stringify(node) %>
   </script>
 <% include footer %>

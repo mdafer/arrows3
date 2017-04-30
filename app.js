@@ -7,6 +7,7 @@ var middleware = require('./config/auth-middleware');
 
 var main = require('./routes/main');
 var dashboard = require('./routes/dashboard');
+var diagram = require('./routes/diagram');
 var profile = require('./routes/profile');
 var auth = require('./routes/auth');
 
@@ -40,6 +41,10 @@ app.post('/dashboard/import', middleware.requireLogin, dashboard.import);
 app.get('/dashboard/sample', middleware.requireLogin, dashboard.sample);
 app.get('/dashboard/export', middleware.requireLogin, dashboard.export);
 app.get('/dashboard/:id', middleware.requireLogin, dashboard.diagram);
+
+// Diagram
+app.put('/diagram/add-node', middleware.requireLogin, diagram.addNode);
+app.delete('/diagram/delete-node', middleware.requireLogin, diagram.deleteNode);
 
 // Profile
 app.get('/profile', profile.view);

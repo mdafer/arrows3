@@ -139,7 +139,8 @@ module.exports.diagram = function(req, res, next) {
                     res.render('dashboard', {
                         csrfToken: req.csrfToken(),
                         diagram: diagram,
-                        diagrams: diagrams
+                        diagrams: diagrams,
+                        node: diagramModel.Node()
                     });
                 });
             });
