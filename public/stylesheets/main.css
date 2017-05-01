@@ -10,6 +10,13 @@ html, body {
     margin-bottom: 20px;
 }
 
+#tools {
+    position: fixed;
+    top: 60px;
+    left:0;
+    z-index: 100;
+}
+
 #diagram {
     position: fixed;
     right: 0;

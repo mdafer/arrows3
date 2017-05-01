@@ -72,6 +72,8 @@ $(".delete-diagram").on("click", function(){
     deleteDiagram(diagram, diagramObj._id);
 });
 
+
+// Import nodes
 function importCSVNodes(){
     var files = event.target.files;
     var importBtn = $("#importBtn");

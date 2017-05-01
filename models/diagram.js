@@ -21,19 +21,13 @@ module.exports.Diagram = mongoose.model('Diagram', new Schema({
 module.exports.Node = function(){
 	var node = {
 		caption: "",
-		id: 0,
 		isRectangle: false,
-		properties: {
-			text: "",
-			width: 50
-		},
+		properties: "",
 		radius: 50,
-		style: {
-			color: "black",
-			fill: "white",
-			stroke: "#333333",
-			strokeWidth: 4
-		},
+		color: "black",
+		fill: "white",
+		stroke: "#333333",
+		strokeWidth: 4,
 		x: 100,
 		y: 100
 	};
@@ -46,14 +40,8 @@ module.exports.Relationship = function(){
 	var relationships = {
 		startNode: "",
 		endNode: "",
-		id: "",
-		properties: {
-			text: "",
-			width: 50
-		},
-		style: {
-			fill: "#333333"
-		},
+		properties: "",
+		fill: "#333333",
 		type: "" 
 
 	};

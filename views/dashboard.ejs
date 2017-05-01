@@ -99,17 +99,44 @@
     </div>
   </nav>
 
-  <ul class="nav nav-pills nav-stacked" style="position: fixed; z-index: 100; top: 60px; left:0;">
-    <li id="addNode" role="presentation" id="tools">
-      <a><strong>Add node</strong></a>
-    </li>
-    <li id="addRelationship">
-      <a><strong>Add rel</strong></a>
-    </li>
-    <li id="deleteElement">
-      <a><strong>Delete element</strong></a>
-    </li>
-  </ul>
+  <div id="tools">
+    <ul class="nav nav-pills nav-stacked mb-2">
+      <li id="zoomIn" role="presentation">
+        <a><strong>Zoom in</strong></a>
+      </li>
+      <li id="zoomOut" role="presentation">
+        <a><strong>Zoom out</strong></a>
+      </li>
+      <li id="zoomFit" role="presentation">
+        <a><strong>Zoom fit</strong></a>
+      </li>
+    </ul>
+    <ul class="nav nav-pills nav-stacked mb-2">
+      <li id="copyStyle" role="presentation">
+        <a><strong>Copy style</strong></a>
+      </li>
+      <li id="addNode" role="presentation">
+        <a><strong>Add node</strong></a>
+      </li>
+      <li id="addRelationship" role="presentation">
+        <a><strong>Add rel</strong></a>
+      </li>
+      <li id="deleteElement" role="presentation">
+        <a><strong>Delete element</strong></a>
+      </li>
+    </ul>
+    <ul class="nav nav-pills nav-stacked">
+      <li id="undo" role="presentation">
+        <a><strong>Undo</strong></a>
+      </li>
+      <li id="redo" role="presentation">
+        <a><strong>Redo</strong></a>
+      </li>
+      <li id="slider" role="presentation">
+        <a><strong>Slider</strong></a>
+      </li>
+    </ul>
+  </div>
 
   <div id="diagram"></div>
 

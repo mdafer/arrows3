@@ -1,3 +1,14 @@
+function changeTool(tool) {
+    var elem = $(tool);
+    elem.toggleClass("active");
+    tools[elem.attr("id")] = !tools[elem.attr("id")];
+    elem.siblings().each(function() {
+        $(this).removeClass("active");
+        tools[$(this).attr("id")] = false;
+    });
+}
+
+
 // Activate: Add node
 $("#addNode").on("click", function() {
     changeTool(this);
@@ -8,8 +19,8 @@ function addNode() {
     if(!tools.addNode){ return; }
 
     var node = mirrorNode;
-    node.x = event.clientX - node.radius - 2;
-    node.y = event.clientY - node.radius - 53;
+    node.x = d3.mouse(gNodes.node())[0] - 50;
+    node.y = d3.mouse(gNodes.node())[1] - 50;
 
     $.ajax({
         type: "PUT",
@@ -20,6 +31,31 @@ function addNode() {
         dataType: "json",
         success: function(res){     
             diagramObj.data.nodes.push(res.node);
+            render();
+        },
+        error: function(err){
+            //
+        }
+    });
+}
+
+// Activate: Add relationship
+$("#addRelationship").on("click", function() {
+    changeTool(this);
+});
+
+// Add Relationship
+function addRelationship(startNode, endNode){
+    $.ajax({
+        type: "PUT",
+        url: "/diagram/add-relationship?diagram=" + diagramObj._id,
+        data: {
+            startNode: startNode,
+            endNode: endNode
+        },
+        dataType: "json",
+        success: function(res){
+            diagramObj.data.relationships.push(res.rel);
             render();
         },
         error: function(err){
@@ -51,26 +87,60 @@ function deleteNode(id){
     });
 }
 
+// Delete Relationship
+function deleteRelationship(id) {
+    if(!tools.deleteElement) { return; }
 
-// Activate: Add relationship
-$("#addRelationship").on("click", function() {
-    changeTool(this);
-});
-
-function changeTool(tool) {
-    var elem = $(tool);
-    elem.toggleClass("active");
-    tools[elem.attr("id")] = !tools[elem.attr("id")];
-    elem.siblings().not(tool).each(function() {
-        $(this).removeClass("active");
-        tools[$(this).attr("id")] = false;
+    $.ajax({
+        type: "DELETE",
+        url: "/diagram/delete-relationship?id=" + id + "&diagram=" + diagramObj._id,
+        dataType: "json",
+        success: function(res){     
+            diagramObj.data.relationships.splice(id, 1);
+            render();
+        },
+        error: function(err){
+            //
+        }
     });
 }
 
+// Zoom in
+$("#zoomIn").on('click', function() {
+    diagramZoom.scale(diagramZoom.scale() * 1.2);
+    zoomed();
+});
 
+// Zoom out
+$("#zoomOut").on('click', function() {
+    diagramZoom.scale(diagramZoom.scale() * 0.8);
+    zoomed();
+});
 
+// Zoom fit
+$("#zoomFit").on('click', function() {
+    zoomFit();
+});
+function zoomFit() {
+    var gNodes = d3.select("g.layer.nodes").node().getBBox();
+    if (gNodes.width === 0 || gNodes.height === 0) { return; }
 
-// Get text width
+    var fullWidth = svg.node().clientWidth || svg.node().parentNode.clientWidth,
+        fullHeight = svg.node().clientHeight || svg.node().parentNode.clientHeight;
+
+    var midX = gNodes.x + gNodes.width / 2,
+        midY = gNodes.y + gNodes.height / 2;
+
+    var scale = 0.95 / Math.max(gNodes.width / fullWidth, gNodes.height / fullHeight);
+    var tx = fullWidth / 2 - scale * midX,
+        ty = fullHeight / 2 - scale * midY;
+
+    diagramZoom.translate([tx, ty]);
+    diagramZoom.scale(scale);
+    zoomed();
+}
+
+// Get text length
 function getTxtLength(text){
     var txt = svg.append("text")
         .attr("font-size",  "50px")
