@@ -44,6 +44,7 @@ app.get('/dashboard/:id', middleware.requireLogin, dashboard.diagram);
 
 // Diagram
 app.put('/diagram/add-node', middleware.requireLogin, diagram.addNode);
+app.put('/diagram/update-node', middleware.requireLogin, diagram.updateNode);
 app.delete('/diagram/delete-node', middleware.requireLogin, diagram.deleteNode);
 app.put('/diagram/add-relationship', middleware.requireLogin, diagram.addRelationship);
 app.delete('/diagram/delete-relationship', middleware.requireLogin, diagram.deleteRelationship);

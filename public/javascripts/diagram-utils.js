@@ -12,6 +12,18 @@ function changeTool(tool) {
 // Activate: Add node
 $("#addNode").on("click", function() {
     changeTool(this);
+    if(tools.addNode){
+        $(this).children(1).append($("#mirrorNode"));
+        $("#mirrorNode")
+            .css(
+                "color", mirrorNode.color,
+                "background-color", mirrorNode.fill,
+                "border-radius", mirrorNode.isRectangle ? "12px" : "4px"
+            )
+            .removeClass("hide");
+    } else {
+        $("#mirrorNode").addClass("hide");
+    }
 });
 
 // Add node
@@ -26,7 +38,7 @@ function addNode() {
         type: "PUT",
         url: "/diagram/add-node?diagram=" + diagramObj._id,
         data: {
-            node: node
+            node: JSON.stringify(node)
         },
         dataType: "json",
         success: function(res){     
@@ -37,6 +49,82 @@ function addNode() {
             //
         }
     });
+}
+
+// Activate: Copy style
+$("#copyStyle").on('click', function() {
+    changeTool(this);
+    if(tools.copyStyle){
+        $(this).children(1).append($("#mirrorNode"));
+        $("#mirrorNode")
+            .css({
+                "color": mirrorNode.color,
+                "background-color": mirrorNode.fill,
+                "border-radius": mirrorNode.isRectangle ? "4px" : "12px",
+            })
+            .removeClass("hide");
+    } else {
+        $("#mirrorNode").addClass("hide");
+    }
+});
+
+// Update node
+function updateNode(node, id) {
+    $.ajax({
+        type: "PUT",
+        url: "/diagram/update-node?id=" + id + "&diagram=" + diagramObj._id,
+        data: {
+            node: JSON.stringify(node)
+        },
+        dataType: "json",
+        success: function(res){
+            Object.keys(diagramObj.data.nodes[id]).forEach(function(key) {
+                diagramObj.data.nodes[id][key] = res.node[key];
+            });
+            diagramObj.data.nodes[id] = res.node;
+            render();
+        },
+        error: function(err){
+            //
+        }
+    });
+}
+
+// Save node
+$("#saveNode").on('click', function() {
+    var node = diagramObj.data.nodes[currentNodeId];
+    node.caption = $("#caption").val();
+    node.properties = $("#nodeProperties").val();
+    node.isRectangle = $("#isRectangle").parent().hasClass("active");
+    node.fill = $("#nodeFill").val();
+    node.color = $("#nodeColor").val();
+
+    updateNode(node, currentNodeId);
+    $("#editNode").addClass("hide");
+});
+
+// Open edit node sidebar
+function editNode(node, id) {
+    $("#editNode").removeClass("hide");
+    $("#caption").val(node.caption);
+    $("#nodeProperties").val(node.properties);
+    node.isRectangle ? $("#isRectangle").click() : $("#isCircle").click() ;
+    $("#nodeColor").val(node.color);
+    $("#nodeColorBtn").css("color", node.color);
+    $("#nodeFill").val(node.fill);
+    $("#nodeFillBtn").css("background-color", node.fill);
+}
+
+// Close edit node sidebar
+$("#closeEditNode").on('click', function() {
+    $("#editNode").addClass("hide");
+});
+
+// Copy style
+function copyStyle(node) {
+    mirrorNode.isRectangle = node.isRectangle;
+    mirrorNode.color = node.color;
+    mirrorNode.fill = node.fill;
 }
 
 // Activate: Add relationship

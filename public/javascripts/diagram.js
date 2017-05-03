@@ -171,13 +171,22 @@ function render(){
         .on("click", function(node, id) {
             if(tools.deleteElement) {
                 deleteNode(id);
-            } else if(tools.addRelationship){
+            } else if(tools.addRelationship) {
                 if(addNewRel){
                     addRelationship(currentNodeId, id);
                 }
                 addNewRel = !addNewRel;
-                currentNodeId = id;
+            } else if(tools.copyStyle) {
+                updateNode({
+                    isRectangle: mirrorNode.isRectangle,
+                    color: mirrorNode.color,
+                    fill: mirrorNode.fill
+                }, id);
+            } else {
+                copyStyle(node);
+                editNode(node, id);
             }
+            currentNodeId = id;
         })
         .on("mouseover", function() {
             d3.select(this).attr("fill", "rgba(150, 150, 255, 0.5)");
@@ -227,7 +236,7 @@ function render(){
         })
         .on("mouseout", function() {
             d3.select(this).attr("stroke-width", "rgba(255, 255, 255, 0)");
-        });;
+        });
 
 }
 

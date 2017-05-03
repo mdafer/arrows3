@@ -43,7 +43,6 @@ module.exports.Relationship = function(){
 		properties: "",
 		fill: "#333333",
 		type: "" 
-
 	};
 
 	return relationships;

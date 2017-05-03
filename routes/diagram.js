@@ -5,7 +5,7 @@ var userModel = require('../models/user');
 module.exports.addNode = function(req, res) {
     diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data.nodes', function(err, diagram){
         if(diagram){
-            var node = req.body.node;
+            var node = JSON.parse(req.body.node);
             if(node){
                 diagram.data.nodes.push(node);
                 diagram.save(function(err) {
@@ -17,6 +17,32 @@ module.exports.addNode = function(req, res) {
                 });
             } else {
                 res.json(403, { error: 'Something went wrong.' });
+            }
+        } else {
+            res.json(404, { error: 'Diagram not found.' });
+        }
+    });
+};
+
+module.exports.updateNode = function(req, res) {
+    diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data.nodes', function(err, diagram){
+        if(diagram){
+            var node = JSON.parse(req.body.node);
+            var id = req.query.id;
+            if(node && id){
+                Object.keys(node).forEach(function(key) {
+                    diagram.data.nodes[id][key] = node[key];
+                });
+                diagram.markModified('data.nodes');
+                diagram.save(function(err, resDiagram) {
+                    if(err){
+                        res.json(403, { error: 'Something went wrong.' });
+                    } else {
+                        res.json(200, { node: resDiagram.data.nodes[id] });
+                    }
+                });
+            } else {
+                res.json(403, { error: 'Node not found.' });
             }
         } else {
             res.json(404, { error: 'Diagram not found.' });
@@ -47,6 +73,7 @@ module.exports.deleteNode = function(req, res) {
     });
 };
 
+
 // Add new relationship
 module.exports.addRelationship = function(req, res) {
     diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data.relationships', function(err, diagram) {
@@ -71,7 +98,7 @@ module.exports.addRelationship = function(req, res) {
             res.json(404, { error: 'Diagram not found.' });
         }
     });
-}
+};
 
 // Delete diagram
 module.exports.deleteRelationship = function(req, res) {
@@ -94,4 +121,4 @@ module.exports.deleteRelationship = function(req, res) {
             res.json(404, { error: 'Diagram not found.' });
         }
     });
-}
+};

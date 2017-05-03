@@ -102,42 +102,87 @@
   <div id="tools">
     <ul class="nav nav-pills nav-stacked mb-2">
       <li id="zoomIn" role="presentation">
-        <a><strong>Zoom in</strong></a>
+        <a>Zoom in</a>
       </li>
       <li id="zoomOut" role="presentation">
-        <a><strong>Zoom out</strong></a>
+        <a>Zoom out</a>
       </li>
       <li id="zoomFit" role="presentation">
-        <a><strong>Zoom fit</strong></a>
+        <a>Zoom fit</a>
       </li>
     </ul>
     <ul class="nav nav-pills nav-stacked mb-2">
       <li id="copyStyle" role="presentation">
-        <a><strong>Copy style</strong></a>
+        <a>Copy style
+          <div id="mirrorNode" class="hide"> T </div>
+        </a>
       </li>
       <li id="addNode" role="presentation">
-        <a><strong>Add node</strong></a>
+        <a>Add node  </a>
       </li>
       <li id="addRelationship" role="presentation">
-        <a><strong>Add rel</strong></a>
+        <a>Add rel</a>
       </li>
       <li id="deleteElement" role="presentation">
-        <a><strong>Delete element</strong></a>
+        <a>Delete element</a>
       </li>
     </ul>
     <ul class="nav nav-pills nav-stacked">
       <li id="undo" role="presentation">
-        <a><strong>Undo</strong></a>
+        <a>Undo</a>
       </li>
       <li id="redo" role="presentation">
-        <a><strong>Redo</strong></a>
+        <a>Redo</a>
       </li>
       <li id="slider" role="presentation">
-        <a><strong>Slider</strong></a>
+        <a>Slider</a>
       </li>
     </ul>
   </div>
 
+  <div id="editNode" class="col-xs-12 col-sm-4 col-md-3 edit-sidebar pd-2 hide">
+    <div class="row mb-2">
+      <button type="button" id="closeEditNode" class="close pull-left" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <form>
+      <div class="form-group">
+        <label for="caption">Caption</label>
+        <input type="text" class="form-control" id="caption" name="caption">
+      </div>
+      <div class="form-group">
+        <label for="caption">Properties</label>
+        <textarea class="form-control" rows="8" id="nodeProperties"></textarea>
+      </div>
+      <div class="form-group">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default active">
+            <input type="radio" name="options" id="isCircle" autocomplete="off" checked> Circle
+          </label>
+          <label class="btn btn-default">
+            <input type="radio" name="options" id="isRectangle" autocomplete="off"> Rect
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-group">
+          <input type="text" class="form-control" name="color" id="nodeColor">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="nodeColorBtn">Text color</button>
+          </span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-group">
+          <input type="text" class="form-control" name="fill" id="nodeFill">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="nodeFillBtn">Fill color</button>
+          </span>
+        </div>
+      </div>
+      <button type="button" class="btn btn-danger">Delete</button>
+      <button type="button" id="saveNode" class="btn btn-primary pull-right">Save</button>
+    </form>
+  </div>
   <div id="diagram"></div>
 
   <!-- Modal -->
