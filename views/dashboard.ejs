@@ -15,7 +15,7 @@
         <ul class="nav navbar-nav">
           <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="">Diagrams <span class="caret"></span></a>
-              <ul id="diagrams" class="dropdown-menu pd-2">
+              <ul id="diagrams" class="dropdown-menu pd-2" onclick="event.stopPropagation();">
                 <div class="row mb-2">
                   <div class="col-sm-8">
                     <div class="input-group">
@@ -32,14 +32,13 @@
                 </div>
                 <table class="table table-hover">
                   <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Created</th>
-                      <th>Updated</th>
-                      <th></th>
+                    <tr id="diagram-header" asc="true">
+                      <th col="title">Name</th>
+                      <th col="created">Created</th>
+                      <th col="lastUpdate">Updated</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="diagram-list">
                     <% for (i in diagrams) {%>
                       <tr id="<%= diagrams[i]._id %>" class="change-diagram">
                         <td><%= diagrams[i].meta.title %></td>

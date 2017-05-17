@@ -13,46 +13,23 @@ module.exports.csvr = function (data) {
 };
 
 // Parse data to csv
-// works for two level deep objects
 function parseCSV(data) {
     if (!data.length) {
         return "";
     }
-    var result, line = "";
-    Object.keys(data[0]).forEach(function (b) {
-        if (typeof data[0][b] === 'object') {
-            Object.keys(data[0][b]).forEach(function (c) {
-                if (line !== "") {
-                    line += ",";
-                }
-                line += b + "_" + c;
-            });
-        } else {
+    var result = "", line, head;
+    head = Object.keys(data[0]).sort();
+    result = head.toString() + "\n";
+    for (var i = 0; i < data.length; i += 1) {
+        line = "";
+        head.map(function (key) {
             if (line !== "") {
                 line += ",";
             }
-            line += b;
-        }
-    });
-    result = line + "\r\n";
-    for (var a = 0; a < data.length; a += 1) {
-        line = "";
-        Object.keys(data[a]).forEach(function (b) {
-            if (typeof data[a][b] === 'object') {
-                Object.keys(data[a][b]).forEach(function (c) {
-                    if (line !== "") {
-                        line += ",";
-                    }
-                    line += (data[a][b][c] === "") ? "null":data[a][b][c];
-                });
-            } else {
-                if (line !== "") {
-                    line += ",";
-                }
-                line += data[a][b] === "" ? "null" : data[a][b];
-            }
+            line += data[i][key] === "" ? "null" : data[i][key];
         });
-        result += line + "\r\n";
+        result += line;
+        result += "\n";
     }
     return result;
 }
@@ -85,7 +62,7 @@ module.exports.markup = function (data) {
 
     for(var i = 0; i < nodes.length; i += 1){
         props = '       <dl class="properties">\n';
-        text = nodes[i].properties.text.split("\n");
+        text = nodes[i].properties.split("\n");
         for(var j = 0; j < text.length; j += 1){
             p = text[j].split(":");
             if(p.length == 2){
@@ -98,15 +75,15 @@ module.exports.markup = function (data) {
             + '" data-x="' + nodes[i].x
             + '" data-y="' + nodes[i].y
             + '" isrect="' + nodes[i].isRectangle
-            + '" style="background-color: ' + nodes[i].style.fill
-            + ' color: ' + nodes[i].style.color
+            + '" style="background-color: ' + nodes[i].fill
+            + '; color: ' + nodes[i].color
             + '">\n' + (nodes[i].caption ? '\n  <span class="caption">' + nodes[i].caption + "</span>\n":"")
             + props + " </li>\n";
     }
     for(var g = 0; g < rel.length; g += 1){
         for(var i = 0; i < rel[g]; i += 1){
             props = '<dl class="properties">\n';
-            text = rel[g][i].properties.text.split("\n");
+            text = rel[g][i].properties.split("\n");
             for(var j = 0; j < text.length; j += 1){
                 p = text[j].split(":");
                 if(p.length == 2){

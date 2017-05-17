@@ -39,6 +39,7 @@ module.exports.addDiagram = function(req, res) {
     diagram.user = req.session.user._id;
     diagram.data.nodes.push(diagramModel.Node());
     diagram.history.push(diagram.data);
+
     diagram.save(function(err){
         res.redirect('/dashboard/' + diagram._id);
     });
@@ -59,24 +60,40 @@ module.exports.deleteDiagram = function(req, res) {
     }
 };
 
+// Sort diagrams
+module.exports.saveSort = function(req, res){
+    if(req.query.col){
+        userModel.User.findOne({ _id: req.session.user._id }, 'sortDiagrams', function(err, user) {
+            user.sortDiagrams.col = req.query.col;
+            user.sortDiagrams.asc = req.query.asc === "true" ? true:false;
+            user.save(function(err) {
+                res.json(200, { success: "Sort successfully updated." });
+            });
+        });
+    } else {
+        res.json(403, { error: 'Parameters are missing' });
+    }
+}
+
 // Import diagram
 module.exports.import = function(req, res, next) {
     if(req.body.nodes){
-        var goodNodes = [];
-        var nodes = req.body.nodes;
+        var goodNodes = [], value;
+        var nodes = JSON.parse(req.body.nodes);
+        var keys = Object.keys(nodes[0]);
+
         for(var i = 0; i < nodes.length; i += 1){
             var node = diagramModel.Node();
-            Object.keys(nodes[i]).forEach(function(keyOne){
-                if(keyOne in node && typeof(node[keyOne]) === typeof(nodes[i][keyOne])){
-                    if(typeof(nodes[i][keyOne]) === 'object'){
-                        Object.keys(nodes[i][keyOne]).forEach(function(keyTwo){
-                            if(keyTwo in node[keyOne] && typeof(node[keyOne][keyTwo]) === typeof(nodes[i][keyOne][keyTwo])) {
-                                node[keyOne][keyTwo] = nodes[i][keyOne][keyTwo];
-                            }
-                        });
-                    } else {
-                        node[keyOne] = nodes[i][keyOne];
+            keys.forEach(function(key){
+                if(key in node){
+                    value = nodes[i][key];
+                    if (typeof(node[key]) === "number"){
+                        value = Number(value);
                     }
+                    else if (value === "false"){ value = false; }
+                    else if (value === "true") { value = true; }
+                    else if (value === "null") { value = ""; }
+                    node[key] = value;
                 }
             });
             goodNodes.push(node);
@@ -89,6 +106,8 @@ module.exports.import = function(req, res, next) {
         diagram.history = {
             nodes: goodNodes
         };
+
+        diagram.markModified('data.nodes', 'history.nodes');
         diagram.save(function(err){
             res.json(200, { diagram: diagram._id });
         });
@@ -100,10 +119,9 @@ module.exports.import = function(req, res, next) {
 // Returns sample object schema for csv
 module.exports.sample = function(req, res, next){
     if(req.query.type === 'nodes'){
-        var data = {
-            nodes: [diagramModel.Node()]
-        };
-        var sample = exportData.csvn(data);
+        var node = diagramModel.Node();
+        var sample = Object.keys(node);
+
         res.json(200, { sample: sample });
     } else {
         next();

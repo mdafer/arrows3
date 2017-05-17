@@ -72,6 +72,41 @@ $(".delete-diagram").on("click", function(){
     deleteDiagram(diagram, diagramObj._id);
 });
 
+// Sort diagrams
+$("#diagram-header").children().each(function(index) {
+    $(this).on('click', function(){
+        var asc = $(this).attr("asc") === "false" ? true : false;
+        var col = $(this).attr("col");
+        $(this).attr("asc", asc);
+
+        sortDiagrams(index, asc);
+        $.ajax({
+            type: "PUT",
+            url: 'save-sort?col=' + col + '&asc=' + asc,
+            dataType: "json",
+            success: function(success){
+                //
+           },
+            error: function(err){
+                //
+            }
+        });
+    }); 
+});
+function sortDiagrams(col, asc){
+    var table = $("#diagram-list");
+    var diagrams = table.children();
+
+    diagrams.sort(function(a, b) {
+        var valueA = $(a).children(col).text().toLowerCase();
+        var valueB = $(b).children(col).text().toLowerCase();
+        return asc ? valueA > valueB : valueA < valueB  ; 
+    });
+    diagrams.each(function(index, elem){
+        table.append(elem);
+    });
+}
+
 
 // Import nodes
 function importCSVNodes(){
@@ -104,7 +139,7 @@ function importCSVNodes(){
                     type: "POST",
                     url: "import",
                     data: {
-                        nodes: nodes
+                        nodes: JSON.stringify(nodes)
                     },
                     dataType: "json",
                     success: function(success){
@@ -121,37 +156,19 @@ function importCSVNodes(){
 }
 
 // Parse CSV
-// Ex: style_color => style: { color: value }
-// Works for two level deep objects
 function parseCSV(data) {
     var parsedData = [];
+    var node;
     var lines = data.split("\n");
-    var header = lines[0];
+    var header = lines[0].trim(" ").split(',');
 
-    header = header.split(',');
     for(var i = 1; i < lines.length; i++) {
-        var line = lines[i].split(",");
-        if(line.length == header.length) {
-            var node = {};
-            for(var j = 0; j < line.length; j++) {
-                var keys = header[j].split("_");
-                if(line[j] === "false"){ line[j] = false; }
-                if(line[j] === "true"){ line[j] = true; }
-                if(keys.length == 1){
-                    if(!isNaN(line[j])){
-                        line[j] = Number(line[j]);
-                    }
-                    node[keys[0]] = line[j] === "null" ? "":line[j];
-                } else if(keys.length == 2) {
-                    if(!node[keys[0]]){
-                        node[keys[0]] = {};
-                    }
-                    if(!isNaN(line[j])){
-                        line[j] = Number(line[j]);
-                    }
-                    node[keys[0]][keys[1]] = line[j] === "null" ? "":line[j];
-                }
-            }
+        lines[i] = lines[i].split(',');
+            if(lines[i].length == header.length){
+            node = {};
+            header.forEach(function(key, j) {
+                node[key] = lines[i][j];
+            });
             parsedData.push(node);
         }
     }
