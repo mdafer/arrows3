@@ -98,12 +98,29 @@ function sortDiagrams(col, asc){
     var diagrams = table.children();
 
     diagrams.sort(function(a, b) {
-        var valueA = $(a).children(col).text().toLowerCase();
-        var valueB = $(b).children(col).text().toLowerCase();
+        var valueA = $(a).children()[col].innerHTML.toLowerCase();
+        var valueB = $(b).children()[col].innerHTML.toLowerCase();
         return asc ? valueA > valueB : valueA < valueB  ; 
     });
     diagrams.each(function(index, elem){
         table.append(elem);
+    });
+}
+
+// Filter diagrams
+$("#diagram-filter").on('keyup', function(){
+    filterDigrams(this.value);
+})
+function filterDigrams(value){
+    let reg = new RegExp(value.split('').join('\\w*'), 'i');
+
+    $("#diagram-list").children().each(function(){
+        var title = $(this).children()[0].innerHTML;
+        if(title.match(reg)){
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
     });
 }
 

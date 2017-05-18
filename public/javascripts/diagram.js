@@ -26,8 +26,8 @@ function zoomed() {
 var svg = d3.select("#diagram")
     .append("svg")
     .attr("class", "graph")
-    .call(diagramZoom)
     .on('click', addNode)
+    .call(diagramZoom)
     .on("wheel.zoom", null)
     .on("dblclick.zoom", null);
 var gNodes = svg.append("g")
@@ -51,11 +51,7 @@ function render(){
     nodes.enter()
         .append("rect")
         .attr("class", "node")
-        .attr("width", function(node) { 
-            var size = getTxtLength(node.caption);
-            node.radius = size < 50 ? 50 : size;
-            return node.radius * 2;
-        })
+        .attr("width", function(node) { return node.radius * 2; })
         .attr("height", function(node) { return node.radius * 2; })
         .attr("x", function(node) { return node.x; })
         .attr("y", function(node) { return node.y; })
@@ -67,50 +63,50 @@ function render(){
         .style("color", function(node) { return node.color; });
 
     // Properties
-    // nodes.enter()
-    //     .append("path")
-    //     .attr("class", "properties path")
-    //     .attr("transform", function(node) {
-    //         return "translate( " + (node.x + 2 * node.radius) + ", " + (node.y + node.radius) + " )";
-    //     })
-    //     .attr("d", function(node) {
-    //         if(node.properties){
-    //             node[lines] = node.properties.split("\n");
-    //             var l = node.lines.length;
-    //             return speechBubblePath(node * 2, l * 50, "horizontal", 10, 10);
-    //         }
-    //         return;
-    //     })
-    //     .attr("fill", "white")
-    //     .attr("stroke", "#333333")
-    //     .attr("stroke-width", 2);
+    nodes.enter()
+        .append("path")
+        .attr("class", "properties path")
+        .attr("transform", function(node) {
+            return "translate( " + (node.x + 2 * node.radius) + ", " + (node.y + node.radius) + " )";
+        })
+        .attr("d", function(node) {
+            if(node.properties){
+                node.lines = node.properties.split("\n");
+                var l = node.lines.length;
+                return speechBubblePath(node.propertiesWidth * 2, l * 50, "horizontal", 10, 10);
+            }
+            return;
+        })
+        .attr("fill", "white")
+        .attr("stroke", "#333333")
+        .attr("stroke-width", 2);
 
-    // var properties = nodes.enter()
-    //     .append("g")
-    //     .attr("class", "properties text");
-    // properties.selectAll("text")
-    //     .data(function(node) {
-    //         var lines = [];
-    //         if(node.lines) {
-    //             for(var i = 0; i < nodes.lines.length; i++){
-    //                 lines.push({
-    //                     "text": node.lines[i],
-    //                     "x": node.x + 2 * node.radius + 20,
-    //                     "y": node.y + node.radius + (i - node.lines.length) * 25 + (i + 1) * 25,
-    //                     "color": node.color
-    //                 });
-    //             }
-    //         }
-    //         return lines;
-    //     })
-    //     .enter()
-    //     .append("text")
-    //     .attr("x", function(line) { return line.x; })
-    //     .attr("y", function(line) { return line.y; })
-    //     .attr("text-anchor", "middle")
-    //     .attr("alignment-baseline", "central")
-    //     .attr("font-size", "central")
-    //     .text(function(line) { return line.text; });
+    var properties = nodes.enter()
+        .append("g")
+        .attr("class", "properties text");
+    properties.selectAll("text")
+        .data(function(node) {
+            var lines = [];
+            if(node.lines) {
+                for(var i = 0; i < node.lines.length; i++){
+                    lines.push({
+                        "text": node.lines[i],
+                        "x": node.x + 2 * node.radius + 20,
+                        "y": node.y + node.radius + (i - node.lines.length) * 25 + (i + 1) * 25,
+                        "color": node.color
+                    });
+                }
+            }
+            return lines;
+        })
+        .enter()
+        .append("text")
+        .attr("x", function(line) { return line.x; })
+        .attr("y", function(line) { return line.y; })
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "central")
+        .attr("font-size", "50px")
+        .text(function(line) { return line.text; });
 
 
     // Captions
@@ -182,7 +178,7 @@ function render(){
                     color: mirrorNode.color,
                     fill: mirrorNode.fill
                 }, id);
-            } else {
+            } else if(!tools.addNode) {
                 copyStyle(node);
                 editNode(node, id);
             }
@@ -193,7 +189,14 @@ function render(){
         })
         .on("mouseout", function() {
             d3.select(this).attr("fill", "rgba(255, 255, 255, 0)");
-        });
+        })
+        .call(d3.behavior.drag()
+            .on("dragstart", dragStartNode)
+            .on("drag", dragNode)
+            .on("dragend", dragEndNode)
+        );
+
+    
 
     var nodeRings = gOverlay.selectAll("rect.ring")
         .data(diagramObj.data.nodes);

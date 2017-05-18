@@ -15,11 +15,11 @@ $("#addNode").on("click", function() {
     if(tools.addNode){
         $(this).children(1).append($("#mirrorNode"));
         $("#mirrorNode")
-            .css(
-                "color", mirrorNode.color,
-                "background-color", mirrorNode.fill,
-                "border-radius", mirrorNode.isRectangle ? "12px" : "4px"
-            )
+            .css({
+                "color": mirrorNode.color,
+                "background-color": mirrorNode.fill,
+                "border-radius": mirrorNode.isRectangle ? "4px" : "12px"
+            })
             .removeClass("hide");
     } else {
         $("#mirrorNode").addClass("hide");
@@ -77,11 +77,11 @@ function updateNode(node, id) {
             node: JSON.stringify(node)
         },
         dataType: "json",
-        success: function(res){
+        success: function(resNode){
             Object.keys(diagramObj.data.nodes[id]).forEach(function(key) {
-                diagramObj.data.nodes[id][key] = res.node[key];
+                diagramObj.data.nodes[id][key] = resNode.node[key];
             });
-            diagramObj.data.nodes[id] = res.node;
+            diagramObj.data.nodes[id] = resNode.node;
             render();
         },
         error: function(err){
@@ -99,6 +99,13 @@ $("#saveNode").on('click', function() {
     node.fill = $("#nodeFill").val();
     node.color = $("#nodeColor").val();
 
+    node.radius = getTxtLength(node.caption);
+    var longest = node.properties.split('\n')
+        .reduce(function(a, b){
+            return a.length > b.length ? a : b; 
+        }, '');
+    node.propertiesWidth = getTxtLength(longest);
+
     updateNode(node, currentNodeId);
     $("#editNode").addClass("hide");
 });
@@ -108,7 +115,7 @@ function editNode(node, id) {
     $("#editNode").removeClass("hide");
     $("#caption").val(node.caption);
     $("#nodeProperties").val(node.properties);
-    node.isRectangle ? $("#isRectangle").click() : $("#isCircle").click() ;
+    node.isRectangle ? $("#isRectangle").click() : $("#isCircle").click();
     $("#nodeColor").val(node.color);
     $("#nodeColorBtn").css("color", node.color);
     $("#nodeFill").val(node.fill);
@@ -228,6 +235,20 @@ function zoomFit() {
     zoomed();
 }
 
+// Drag nodes
+var dragStartNode = function() {
+    //svg.on("mousemove.zoom", null);
+    d3.event.sourceEvent.stopPropagation();
+};
+var dragNode = function(node) {
+    node.x += d3.event.dx;
+    node.y += d3.event.dy;
+    //render();
+};
+var dragEndNode = function(node, id) {
+    updateNode(node, id);
+};
+
 // Get text length
 function getTxtLength(text){
     var txt = svg.append("text")
@@ -236,7 +257,7 @@ function getTxtLength(text){
     var size = txt.node().getComputedTextLength() / 2 + 20;
     txt.remove();
 
-    return size;
+    return size < 50 ? 50 : size;
 }
 
 // Properties path
