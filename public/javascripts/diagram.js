@@ -45,6 +45,22 @@ var gOverlay = svg.append("g")
 function render(){
     svg.selectAll("g > *").remove();
 
+    resetGroupRel();
+    diagramObj.data.relationships.forEach(function(rel){
+        var i = groupRel[rel.startNode][rel.endNode];
+        groupRel[rel.startNode][rel.endNode]++;
+        groupRel[rel.endNode][rel.startNode]++;
+        rel.source = diagramObj.data.nodes[rel.startNode];
+        rel.target = diagramObj.data.nodes[rel.endNode];
+        rel.angle = angleTo(rel.target, rel.source);
+        rel.distance = distanceTo(rel.target, rel.source) - 12;
+        if(i){
+            rel.position = curvedArrow(rel.source.radius + 12, rel.target.radius, rel.distance, i * 10, 5, 20, 20);
+        } else {
+            rel.position  = horizontalArrow(rel.source.radius + 12, rel.distance - rel.target.radius, 5);
+        }
+    });
+
     // Nodes
     var nodes = gNodes.selectAll("rect.node")
         .data(diagramObj.data.nodes);
@@ -91,7 +107,7 @@ function render(){
                 for(var i = 0; i < node.lines.length; i++){
                     lines.push({
                         "text": node.lines[i],
-                        "x": node.x + 2 * node.radius + 20,
+                        "x": node.x + 2 * node.radius + node.propertiesWidth + 20,
                         "y": node.y + node.radius + (i - node.lines.length) * 25 + (i + 1) * 25,
                         "color": node.color
                     });
@@ -133,23 +149,10 @@ function render(){
         .append("path")
         .attr("class", "relationship")
         .attr("transform", function(rel) {
-            //return "translate(" + (rel.source.x + rel.source.radius) + "," + (rel.source.y + rel.source.radius) + ")" + "rotate(" + rel.angle + ")";
+            return "translate(" + (rel.source.x + rel.source.radius) + "," + (rel.source.y + rel.source.radius) + ")" + "rotate(" + rel.angle + ")";
         })
-        .attr("d", function(rel, i) {
-            return;
-            if(i){
-                rel.position = curvedArrow(rel.source.radius + 12, rel.target.radius, rel.distance, i * 10, 5, 20, 20);
-                rel.d = rel.position.outline;
-                return rel.position.outline;
-            } else {
-                rel.position  = horizontalArrow(rel.source.radius + 12, rel.distance - rel.target.radius, 5);
-                rel.d = rel.position.outline;
-                return rel.position.outline;
-            }
-        })
+        .attr("d", function(rel, i) { return rel.position.outline; })
         .attr("fill", function(rel) { return rel.fill; });
-
-
 
     // Overlays
     var nodeOverlays = gOverlay.selectAll("rect.node")
@@ -225,20 +228,24 @@ function render(){
         .append("path")
         .attr("class", "relationship")
         .attr("transform", function(rel) {
-           // return "translate(" + (rel.source.x + rel.source.radius) + "," + (rel.source.y + rel.source.radius) + ")" + "rotate(" + rel.angle + ")";
+           return "translate(" + (rel.source.x + rel.source.radius) + "," + (rel.source.y + rel.source.radius) + ")" + "rotate(" + rel.angle + ")";
         })
-        .attr("d", function(rel) { return rel.d; })
+        .attr("d", function(rel) { return rel.position.outline; })
         .attr("fill", "rgba(255, 255, 255, 0)")
         .attr("stroke-width", 5)
         .attr("stroke", "rgba(255, 255, 255, 0)")
         .on("click", function(rel, id) {
-            deleteRelationship(id);
+            if(tools.deleteElement){
+                deleteRelationship(id);
+            } else {
+                editRel(rel, id);
+            }
         })
         .on("mouseover", function() {
-            d3.select(this).attr("stroke-width", "rgba(150, 150, 255, 0.5)");
+            d3.select(this).attr("stroke", "rgba(150, 150, 255, 0.5)");
         })
         .on("mouseout", function() {
-            d3.select(this).attr("stroke-width", "rgba(255, 255, 255, 0)");
+            d3.select(this).attr("stroke", "rgba(255, 255, 255, 0)");
         });
 
 }

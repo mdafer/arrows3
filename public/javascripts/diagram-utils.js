@@ -159,6 +159,20 @@ function addRelationship(startNode, endNode){
     });
 }
 
+// Open edit relationship sidebar
+function editRel(rel, id) {
+    $("#editRel").removeClass("hide");
+    $("#type").val(rel.type);
+    $("#relProperties").val(rel.properties);
+    $("#relFill").val(rel.fill);
+    $("#relFillBtn").css("background-color", rel.fill);
+}
+
+// Close edit rel sidebar
+$("#closeEditRel").on('click', function() {
+    $("#editRel").addClass("hide");
+});
+
 // Activate: Delete node
 $("#deleteElement").on('click', function() {
     changeTool(this);
@@ -307,6 +321,37 @@ function speechBubblePath(width, height, style, margin, padding) {
     return styles[style].join(" ");
 }
 
+
+var groupRel = [];
+var len = diagramObj.data.nodes.length;
+for(var i = 0; i < len; i++){
+    groupRel.push([]);
+    for(var j = 0; j < len; j++){
+        groupRel[i].push(0);
+    }
+}
+
+function resetGroupRel(){
+    for(var i = 0; i < groupRel.length; i++){
+        for(var j = 0; j < groupRel[0].length; j++){
+            groupRel[i][j] = 0;
+        }
+    }
+}
+
+function angleTo(source, target) {
+    var dx = (source.x + source.radius) - (target.x + target.radius);
+    var dy = (source.y + source.radius) - (target.y + target.radius);
+
+    return Math.atan2(dy, dx) * 180 / Math.PI;
+}
+
+function distanceTo(source, target) {
+    var dx = (source.x + source.radius) - (target.x + target.radius);
+    var dy = (source.y + source.radius) - (target.y + target.radius);
+
+    return Math.sqrt(dx * dx + dy * dy);
+}
 
 function horizontalArrow(start, end, arrowWidth) {
     var shaftRadius = arrowWidth / 2;

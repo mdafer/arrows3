@@ -149,7 +149,7 @@
         <input type="text" class="form-control" id="caption" name="caption">
       </div>
       <div class="form-group">
-        <label for="caption">Properties</label>
+        <label for="nodeProperties">Properties</label>
         <textarea class="form-control" rows="8" id="nodeProperties"></textarea>
       </div>
       <div class="form-group">
@@ -182,9 +182,34 @@
       <button type="button" id="saveNode" class="btn btn-primary pull-right">Save</button>
     </form>
   </div>
+  <div id="editRel" class="col-xs-12 col-sm-4 col-md-3 edit-sidebar pd-2 hide">
+    <div class="row mb-2">
+      <button type="button" id="closeEditRel" class="close pull-left" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <form>
+      <div class="form-group">
+        <label for="type">Type</label>
+        <input type="text" class="form-control" id="type" name="type">
+      </div>
+      <div class="form-group">
+        <label for="relProperties">Properties</label>
+        <textarea class="form-control" rows="8" id="relProperties"></textarea>
+      </div>
+      <div class="form-group">
+        <div class="input-group">
+          <input type="text" class="form-control" name="fill" id="relFill">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="relFillBtn">Fill color</button>
+          </span>
+        </div>
+      </div>
+      <button type="button" class="btn btn-danger">Delete</button>
+      <button type="button" id="saveRel" class="btn btn-primary pull-right">Save</button>
+    </form>
+  </div>
   <div id="diagram"></div>
 
-  <!-- Modal -->
+  <!-- Update title -->
   <div class="modal fade" id="mainModal" tabindex="-1" role="dialog" aria-labelledby="mainModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
