@@ -6,6 +6,7 @@ function changeTool(tool) {
         $(this).removeClass("active");
         tools[$(this).attr("id")] = false;
     });
+    $("#mirrorNode").addClass("hide");
 }
 
 
@@ -21,8 +22,6 @@ $("#addNode").on("click", function() {
                 "border-radius": mirrorNode.isRectangle ? "4px" : "12px"
             })
             .removeClass("hide");
-    } else {
-        $("#mirrorNode").addClass("hide");
     }
 });
 
@@ -78,10 +77,10 @@ function updateNode(node, id) {
         },
         dataType: "json",
         success: function(resNode){
-            Object.keys(diagramObj.data.nodes[id]).forEach(function(key) {
+            Object.keys(resNode.node).forEach(function(key) {
                 diagramObj.data.nodes[id][key] = resNode.node[key];
             });
-            diagramObj.data.nodes[id] = resNode.node;
+            //diagramObj.data.nodes[id] = resNode.node;
             render();
         },
         error: function(err){
@@ -92,7 +91,7 @@ function updateNode(node, id) {
 
 // Save node
 $("#saveNode").on('click', function() {
-    var node = diagramObj.data.nodes[currentNodeId];
+    var node = {};
     node.caption = $("#caption").val();
     node.properties = $("#nodeProperties").val();
     node.isRectangle = $("#isRectangle").parent().hasClass("active");
@@ -159,8 +158,45 @@ function addRelationship(startNode, endNode){
     });
 }
 
+// Update relationship
+function updateRel(rel, id) {
+    $.ajax({
+        type: "PUT",
+        url: "/diagram/update-relationship?id=" + id + "&diagram=" + diagramObj._id,
+        data: {
+            rel: JSON.stringify(rel)
+        },
+        dataType: "json",
+        success: function(resRel){
+            Object.keys(resRel.rel).forEach(function(key) {
+                diagramObj.data.relationships[id][key] = resRel.rel[key];
+            });
+            render();
+        },
+        error: function(err){
+            //
+        }
+    });
+}
+
+// Save relationship
+$("#saveRel").on('click', function(){
+    var rel = {};
+    rel.type = $("#type").val();
+    rel.properties = $("#relProperties").val();
+    rel.fill = $("#relFill").val();
+    var longest = rel.properties.split('\n')
+        .reduce(function(a, b){
+           return a.length > b.length ? a : b; 
+        }, '');
+    rel.propertiesWidth = getTxtLength(longest);
+
+    updateRel(rel, currentRelId);
+    $("#editRel").addClass("hide");
+});
+
 // Open edit relationship sidebar
-function editRel(rel, id) {
+function editRel(rel) {
     $("#editRel").removeClass("hide");
     $("#type").val(rel.type);
     $("#relProperties").val(rel.properties);
@@ -182,11 +218,23 @@ $("#deleteElement").on('click', function() {
 function deleteNode(id){
     if(!tools.deleteElement) { return; }
 
+    var rels = diagramObj.data.relationships.filter(function(rel){
+        var res = rel.startNode != id && rel.endNode != id;
+        var a = Number(rel.startNode);
+        var b = Number(rel.endNode);
+        var c = Number(id);
+        if(a > c) { rel.startNode = a - 1; }
+        if(b > c) { rel.endNode = b - 1; }
+        
+        return res;
+    });
+
     $.ajax({
         type: "DELETE",
         url: "/diagram/delete-node?id=" + id + "&diagram=" + diagramObj._id,
         dataType: "json",
-        success: function(res){     
+        success: function(res){    
+            diagramObj.data.relationships = rels;
             diagramObj.data.nodes.splice(id, 1);
             render();
         },
@@ -250,17 +298,21 @@ function zoomFit() {
 }
 
 // Drag nodes
+var startPoint = {};
 var dragStartNode = function() {
-    //svg.on("mousemove.zoom", null);
+    startPoint.x = d3.event.sourceEvent.x;
+    startPoint.y = d3.event.sourceEvent.y;
     d3.event.sourceEvent.stopPropagation();
 };
 var dragNode = function(node) {
     node.x += d3.event.dx;
     node.y += d3.event.dy;
-    //render();
+    render();
 };
 var dragEndNode = function(node, id) {
-    updateNode(node, id);
+    if(Math.max(Math.abs(d3.event.sourceEvent.x - startPoint.x), Math.abs(d3.event.sourceEvent.y - startPoint.y)) > 5){
+        updateNode(node, id);
+    }
 };
 
 // Get text length
@@ -321,22 +373,16 @@ function speechBubblePath(width, height, style, margin, padding) {
     return styles[style].join(" ");
 }
 
-
-var groupRel = [];
-var len = diagramObj.data.nodes.length;
-for(var i = 0; i < len; i++){
-    groupRel.push([]);
-    for(var j = 0; j < len; j++){
-        groupRel[i].push(0);
-    }
-}
-
-function resetGroupRel(){
-    for(var i = 0; i < groupRel.length; i++){
-        for(var j = 0; j < groupRel[0].length; j++){
-            groupRel[i][j] = 0;
+function createGroupRel(){
+    var groupRel = [];
+    var len = diagramObj.data.nodes.length;
+    for(var i = 0; i < len; i++){
+        groupRel.push([]);
+        for(var j = 0; j < len; j++){
+            groupRel[i].push(0);
         }
     }
+    return groupRel;
 }
 
 function angleTo(source, target) {

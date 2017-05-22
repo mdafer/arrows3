@@ -29,7 +29,7 @@ module.exports.updateNode = function(req, res) {
         if(diagram){
             var node = JSON.parse(req.body.node);
             var id = req.query.id;
-            if(node && id){
+            if(node && diagram.data.nodes[id]){
                 Object.keys(node).forEach(function(key) {
                     diagram.data.nodes[id][key] = node[key];
                 });
@@ -52,10 +52,20 @@ module.exports.updateNode = function(req, res) {
 
 // Delete node
 module.exports.deleteNode = function(req, res) {
-    diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data.nodes', function(err, diagram) {
+    diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data', function(err, diagram) {
         var id = req.query.id;
         if(diagram && id) {
-            if(id >= 0 && id < diagram.data.nodes.length){
+            if(diagram.data.nodes[id]){
+                diagram.data.relationships = diagram.data.relationships.filter(function(rel){
+                    var res = rel.startNode != id && rel.endNode != id;
+                    var a = Number(rel.startNode);
+                    var b = Number(rel.endNode);
+                    var c = Number(id);
+                    if(a > c) { rel.startNode = a - 1; }
+                    if(b > c) { rel.endNode = b - 1; }
+                    
+                    return res;
+                });
                 diagram.data.nodes.splice(id, 1);
                 diagram.save(function(err) {
                     if(err){
@@ -100,12 +110,39 @@ module.exports.addRelationship = function(req, res) {
     });
 };
 
-// Delete diagram
+// Update relationship
+module.exports.updateRelationship = function(req, res){
+    diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data.relationships', function(err, diagram) {
+        var id = req.query.id;
+        var rel = JSON.parse(req.body.rel);
+        if(diagram) {
+            if(rel && diagram.data.relationships[id]){
+                Object.keys(rel).forEach(function(key) {
+                    diagram.data.relationships[id][key] = rel[key];
+                });
+                diagram.markModified('data.relationships');
+                diagram.save(function(err, resDiagram) {
+                    if(err){
+                        res.json(403, { error: 'Something went wrong.' });
+                    } else {
+                        res.json(200, { rel: resDiagram.data.relationships[id] });
+                    }
+                });
+            } else {
+                res.json(404, { error: 'Relationship not found.' });
+            }
+        } else {
+            res.json(404, { error: 'Diagram not found.' });
+        }
+    });
+};
+
+// Delete relationship
 module.exports.deleteRelationship = function(req, res) {
     diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, 'data.relationships', function(err, diagram) {
         var id = req.query.id;
-        if(diagram && id) {
-            if(id >= 0 && id < diagram.data.relationships.length){
+        if(diagram) {
+            if(diagram.data.relationships[id]){
                 diagram.data.relationships.splice(id, 1);
                 diagram.save(function(err) {
                     if(err){
@@ -115,7 +152,7 @@ module.exports.deleteRelationship = function(req, res) {
                     }
                 });
             } else {
-                res.json(404, { error: 'Relationships not found.' });
+                res.json(404, { error: 'Relationship not found.' });
             }
         } else {
             res.json(404, { error: 'Diagram not found.' });

@@ -23,6 +23,7 @@ module.exports.Node = function(){
 		caption: "",
 		isRectangle: false,
 		properties: "",
+		propertiesWidth: 0,
 		radius: 50,
 		color: "black",
 		fill: "white",
@@ -41,6 +42,7 @@ module.exports.Relationship = function(){
 		startNode: "",
 		endNode: "",
 		properties: "",
+		propertiesWidth: 0,
 		fill: "#333333",
 		type: "" 
 	};

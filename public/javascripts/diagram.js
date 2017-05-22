@@ -7,6 +7,7 @@ var tools = {
     deleteElement: false
 };
 var currentNodeId = 0;
+var currentRelId = 0;
 var addNewRel = false;
 
 /*
@@ -30,12 +31,12 @@ var svg = d3.select("#diagram")
     .call(diagramZoom)
     .on("wheel.zoom", null)
     .on("dblclick.zoom", null);
+var gRelationships = svg.append("g")
+    .attr("class", "layer relationships");
 var gNodes = svg.append("g")
     .attr("class", "layer nodes");
 var gCaptions = svg.append("g")
     .attr("class", "layer captions");
-var gRelationships = svg.append("g")
-    .attr("class", "layer relationships");
 var gOverlay = svg.append("g")
     .attr("class", "layer overlay");
 
@@ -45,7 +46,7 @@ var gOverlay = svg.append("g")
 function render(){
     svg.selectAll("g > *").remove();
 
-    resetGroupRel();
+    var groupRel = createGroupRel();
     diagramObj.data.relationships.forEach(function(rel){
         var i = groupRel[rel.startNode][rel.endNode];
         groupRel[rel.startNode][rel.endNode]++;
@@ -139,8 +140,6 @@ function render(){
         .attr("alignment-baseline", "central")
         .text(function(node) { return node.caption; });
 
-
-
     // Relationships
     var relationships = gRelationships.selectAll("path.relationship")
         .data(diagramObj.data.relationships);
@@ -153,6 +152,101 @@ function render(){
         })
         .attr("d", function(rel, i) { return rel.position.outline; })
         .attr("fill", function(rel) { return rel.fill; });
+
+
+    relationships.enter()
+        .append("g")
+        .attr("class", "type")
+        .attr("transform", function(rel) {
+            return "translate("
+            + (rel.source.x + rel.source.radius)
+            + ","
+            + (rel.source.y + rel.source.radius)
+            + ")" + "rotate(" + rel.angle + ")";
+        })
+        .append("text")
+        .attr("x", function(rel) { return rel.position.apex.x; })
+        .attr("y", function(rel) { return rel.position.apex.y - 40; })
+        .attr("fill", "#333333")
+        .attr("class", "relationship type")
+        .attr("text-anchor", "middle")
+        .attr("font-size",  "50px")
+        .attr("alignment-baseline", "central")
+        .text(function(rel) { return rel.type; });
+
+    relationships.enter()
+        .append("g")
+        .attr("class", "group r")
+        .attr("transform", function(rel) {
+            return "translate("
+            + (rel.source.x + rel.source.radius)
+            + ","
+            + (rel.source.y + rel.source.radius)
+            + ")" + "rotate(" + rel.angle + ")";
+        })
+        .append("path")
+        .attr("class", "relationship bubble")
+        .attr("transform", function(rel) {
+            return "translate("
+            + rel.position.apex.x
+            + ","
+            + rel.position.apex.y
+            + ")";
+        })
+        .attr("d", function(rel) { 
+            if(rel.properties){
+                rel.lines = rel.properties.split("\n");
+                var l = rel.lines.length;
+                return speechBubblePath(rel.propertiesWidth * 2, l * 50, "vertical", 10, 10);
+            }
+            return;
+        })
+        .attr("fill", "white")
+        .attr("stroke", "#333333")
+        .attr("stroke-width", 2);
+
+    var propertiesR = relationships.enter()
+        .append("g")
+        .attr("class", "relationship properties")
+        .attr("transform", function(rel) {
+            if(rel.lines) {
+                return "translate("
+                + (rel.source.x + rel.source.radius)
+                + ","
+                + (rel.source.y + rel.source.radius)
+                + ")" + "rotate(" + rel.angle + ")";
+            } else { 
+                return "";
+            }
+        });
+    propertiesR.selectAll("text")   
+        .data(function(rel) { 
+            if(rel.lines){
+                var list = [];
+                for(var i = 0; i < rel.lines.length; i++){
+                    list.push({
+                        "text": rel.lines[i],
+                        "x": rel.position.apex.x,
+                        "y": rel.position.apex.y + (i * 50) + 40,
+                        "color": rel.fill,
+                        "angle": rel.angle
+                    });
+                }
+                return list;
+            } else {
+                return [];
+            }
+        })
+        .enter()
+        .append("text")
+        .attr("x", function(p) { return p.x; })
+        .attr("y", function(p) { return p.y; })
+        .attr("fill", function(p) { return p.color; })
+        .attr("class", "properties")
+        .attr("text-anchor", "middle")
+        .attr("font-size",  "50px")
+        .attr("alignment-baseline", "central")
+        .text(function(p) { return p.text; });
 
     // Overlays
     var nodeOverlays = gOverlay.selectAll("rect.node")
@@ -238,7 +332,8 @@ function render(){
             if(tools.deleteElement){
                 deleteRelationship(id);
             } else {
-                editRel(rel, id);
+                currentRelId = id;
+                editRel(rel);
             }
         })
         .on("mouseover", function() {
