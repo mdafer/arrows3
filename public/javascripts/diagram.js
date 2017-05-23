@@ -293,6 +293,13 @@ function render(){
             .on("dragend", dragEndNode)
         );
 
+    gNodes.append("rect")
+        .attr("class", "new-node")
+        .attr("width", 100)
+        .attr("height", 100)
+        .attr("fill", "none");
+    gRelationships.append("path")
+        .attr("class", "new-relationship");
     
 
     var nodeRings = gOverlay.selectAll("rect.ring")
@@ -314,7 +321,12 @@ function render(){
         })
         .on("mouseout", function() {
             d3.select(this).attr("stroke", "rgba(255, 255, 255, 0)");
-        });
+        })
+        .call(d3.behavior.drag()
+            .on("dragstart", dragStartRing)
+            .on("drag", dragRing)
+            .on("dragend", dragEndRing)
+        );
 
     relOverlays = gOverlay.selectAll("path.relationship")
         .data(diagramObj.data.relationships);

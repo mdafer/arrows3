@@ -315,6 +315,71 @@ var dragEndNode = function(node, id) {
     }
 };
 
+// Drag ring
+var closestNode;
+var newNode = {};
+var dragStartRing = function() {
+    d3.event.sourceEvent.stopPropagation();
+};
+var dragRing = function(node, index) {
+    closestNode = "";
+    newNode.isRectangle = node.isRectangle;
+    newNode.fill = node.fill;
+    newNode.color = node.color;
+    newNode.radius = 50;
+    newNode.x = d3.mouse(this)[0] - newNode.radius;
+    newNode.y = d3.mouse(this)[1] - newNode.radius;
+
+    diagramObj.data.nodes.find(function(n, i){
+        if(index != i && distanceTo(n, newNode) <= n.radius + newNode.radius){
+            closestNode += i;
+            newNode.x = n.x + n.radius - newNode.radius;
+            newNode.y = n.y + n.radius - newNode.radius;
+            return true;
+        }
+        return false;
+    });
+
+    if(closestNode){
+        d3.select("rect.new-node")
+            .attr("fill", "none")
+            .attr("stroke", "none")
+            .style("color", "none");
+    } else {
+        d3.select("rect.new-node")
+            .attr("x", newNode.x)
+            .attr("y", newNode.y)
+            .attr("rx", node.isRectangle ? 20 : node.radius)
+            .attr("ry", node.isRectangle ? 20 : node.radius)
+            .attr("fill", node.fill)
+            .attr("stroke", node.stroke)
+            .attr("stroke-width", node.strokeWidth)
+            .style("color", node.color);    
+    }
+
+    var distance = distanceTo(node, newNode) - newNode.radius - 12;
+    if(distance > node.radius){
+        d3.select("path.new-relationship")
+            .attr("transform", 
+                "translate(" 
+                + (node.x + node.radius)
+                + ","
+                + (node.y + node.radius)
+                + ")" + "rotate("
+                + angleTo(newNode, node) + ")"
+                )
+            .attr("d", horizontalArrow(node.radius + 12, distance, 5).outline)
+            .attr("fill", "#333333");           
+    }
+};
+var dragEndRing = function(node, index){
+    if(closestNode){
+        addRelationship(index, closestNode);
+    } else {
+        //
+    }
+};
+
 // Get text length
 function getTxtLength(text){
     var txt = svg.append("text")
