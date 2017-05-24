@@ -26,13 +26,16 @@ $("#addNode").on("click", function() {
 });
 
 // Add node
-function addNode() {
+function addNodeOnClick() {
     if(!tools.addNode){ return; }
 
     var node = mirrorNode;
     node.x = d3.mouse(gNodes.node())[0] - 50;
     node.y = d3.mouse(gNodes.node())[1] - 50;
 
+    addNode(node);
+}
+function addNode(node){
     $.ajax({
         type: "PUT",
         url: "/diagram/add-node?diagram=" + diagramObj._id,
@@ -42,6 +45,7 @@ function addNode() {
         dataType: "json",
         success: function(res){     
             diagramObj.data.nodes.push(res.node);
+            historyIndex++;
             render();
         },
         error: function(err){
@@ -80,6 +84,7 @@ function updateNode(node, id) {
             Object.keys(resNode.node).forEach(function(key) {
                 diagramObj.data.nodes[id][key] = resNode.node[key];
             });
+            historyIndex++;
             //diagramObj.data.nodes[id] = resNode.node;
             render();
         },
@@ -150,6 +155,7 @@ function addRelationship(startNode, endNode){
         dataType: "json",
         success: function(res){
             diagramObj.data.relationships.push(res.rel);
+            historyIndex++;
             render();
         },
         error: function(err){
@@ -171,6 +177,7 @@ function updateRel(rel, id) {
             Object.keys(resRel.rel).forEach(function(key) {
                 diagramObj.data.relationships[id][key] = resRel.rel[key];
             });
+            historyIndex++;
             render();
         },
         error: function(err){
@@ -236,6 +243,7 @@ function deleteNode(id){
         success: function(res){    
             diagramObj.data.relationships = rels;
             diagramObj.data.nodes.splice(id, 1);
+            historyIndex++;
             render();
         },
         error: function(err){
@@ -254,10 +262,40 @@ function deleteRelationship(id) {
         dataType: "json",
         success: function(res){     
             diagramObj.data.relationships.splice(id, 1);
+            historyIndex++;
             render();
         },
         error: function(err){
             //
+        }
+    });
+}
+
+// Undo
+$("#undo").on('click', function(){
+    historyIndex--;
+    updateToIndex(historyIndex);
+});
+
+// Redo
+$("#redo").on('click', function(){
+    historyIndex++;
+    updateToIndex(historyIndex);
+});
+
+function updateToIndex(index) {
+    $.ajax({
+        type: "PUT",
+        url: "/diagram/update-to-index?index=" + index + "&diagram=" + diagramObj._id,
+        dataType: "json",
+        success: function(res){     
+            diagramObj.data = res.data;
+            render();
+        },
+        error: function(err){
+            if(err.responseJSON.index !== undefined){
+                historyIndex = Number(err.responseJSON.index);
+            }
         }
     });
 }
@@ -376,7 +414,12 @@ var dragEndRing = function(node, index){
     if(closestNode){
         addRelationship(index, closestNode);
     } else {
-        //
+        Object.keys(newNode).forEach(function(key){
+            mirrorNode[key] = newNode[key];
+        });
+        var l = diagramObj.data.nodes.length;
+        addNode(mirrorNode);
+        addRelationship(index, l);
     }
 };
 

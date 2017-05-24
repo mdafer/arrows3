@@ -12,6 +12,7 @@ module.exports.addNode = function(req, res) {
                     if(err){
                         res.json(403, { error: 'Something went wrong.' });
                     } else {
+                        module.exports.updateHistory(req.query.diagram);
                         res.json(200, { node: node });
                     }
                 });
@@ -38,6 +39,7 @@ module.exports.updateNode = function(req, res) {
                     if(err){
                         res.json(403, { error: 'Something went wrong.' });
                     } else {
+                        module.exports.updateHistory(req.query.diagram);
                         res.json(200, { node: resDiagram.data.nodes[id] });
                     }
                 });
@@ -71,6 +73,7 @@ module.exports.deleteNode = function(req, res) {
                     if(err){
                         res.json(403, { error: 'Something went wrong.' });
                     } else {
+                        module.exports.updateHistory(req.query.diagram);
                         res.json(200, { id: id });
                     }
                 });
@@ -98,6 +101,7 @@ module.exports.addRelationship = function(req, res) {
                     if(err){
                         res.json(403, { error: 'Something went wrong.' });
                     } else {
+                        module.exports.updateHistory(req.query.diagram);
                         res.json(200, { rel: rel });
                     }
                 });
@@ -125,6 +129,7 @@ module.exports.updateRelationship = function(req, res){
                     if(err){
                         res.json(403, { error: 'Something went wrong.' });
                     } else {
+                        module.exports.updateHistory(req.query.diagram);
                         res.json(200, { rel: resDiagram.data.relationships[id] });
                     }
                 });
@@ -148,6 +153,7 @@ module.exports.deleteRelationship = function(req, res) {
                     if(err){
                         res.json(403, { error: 'Something went wrong.' });
                     } else {
+                        module.exports.updateHistory(req.query.diagram);
                         res.json(200, { id: id });
                     }
                 });
@@ -157,5 +163,44 @@ module.exports.deleteRelationship = function(req, res) {
         } else {
             res.json(404, { error: 'Diagram not found.' });
         }
+    });
+};
+
+// Undo
+module.exports.updateToIndex = function(req, res) {
+    diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, function(err, diagram) {
+        var index = Number(req.query.index);
+
+        if(diagram) {
+            if(index >= 0 && index < diagram.history.length){
+                diagram.meta.historyIndex = index;
+                diagram.data = diagram.history[index];
+                diagram.save(function(err, diagramRes) {
+                    if(err) {
+                        res.json(403, { error: 'Something went wrong.' });
+                    } else {
+                        res.json(200, { data: diagramRes.data });
+                    }
+                });
+            } else {
+                res.json(404, {
+                    error: 'Index not found.',
+                    index: index < 0 ? 0 : diagram.history.length - 1
+                });
+            }
+        } else {
+            res.json(404, { error: 'Diagram not found.' });
+        }
+        
+    });
+};
+
+// Update history
+module.exports.updateHistory = function(diagramId){
+    diagramModel.Diagram.findOne({ _id: diagramId }, function(err, diagram) {
+        diagram.meta.historyIndex++;
+        diagram.history.splice(diagram.meta.historyIndex);
+        diagram.history.push(diagram.data);
+        diagram.save();
     });
 };

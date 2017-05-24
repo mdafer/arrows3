@@ -50,6 +50,7 @@ app.delete('/diagram/delete-node', middleware.requireLogin, diagram.deleteNode);
 app.put('/diagram/add-relationship', middleware.requireLogin, diagram.addRelationship);
 app.put('/diagram/update-relationship', middleware.requireLogin, diagram.updateRelationship)
 app.delete('/diagram/delete-relationship', middleware.requireLogin, diagram.deleteRelationship);
+app.put('/diagram/update-to-index', middleware.requireLogin, diagram.updateToIndex);
 
 // Profile
 app.get('/profile', profile.view);

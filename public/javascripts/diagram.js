@@ -27,7 +27,7 @@ function zoomed() {
 var svg = d3.select("#diagram")
     .append("svg")
     .attr("class", "graph")
-    .on('click', addNode)
+    .on('click', addNodeOnClick)
     .call(diagramZoom)
     .on("wheel.zoom", null)
     .on("dblclick.zoom", null);
