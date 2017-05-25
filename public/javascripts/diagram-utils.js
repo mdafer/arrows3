@@ -300,6 +300,35 @@ function updateToIndex(index) {
     });
 }
 
+// Create branch and stay
+$("#create-stay").on('click', function() {
+    var title = $("#new-branch-title").val();
+    createBranch(title, historyIndex, 0);
+});
+// Create and go to new diagram
+$("#create-go").on('click', function() {
+    var title = $("#new-branch-title").val();
+    createBranch(title, historyIndex, 1);
+});
+// Create branch
+function createBranch(title, index, red) {
+    var url = "/diagram/create-branch?index=" + index;
+    url += "&title=" + title;
+    url += "&diagram=" + diagramObj._id;
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "json",
+        success: function(res){
+            if(red) { window.location.href = res.id; }
+        },
+        error: function(err){
+            //
+        }
+    });
+}
+
 // Zoom in
 $("#zoomIn").on('click', function() {
     diagramZoom.scale(diagramZoom.scale() * 1.2);

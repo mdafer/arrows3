@@ -207,7 +207,41 @@
       <button type="button" id="saveRel" class="btn btn-primary pull-right">Save</button>
     </form>
   </div>
+
   <div id="diagram"></div>
+
+  <!-- Slider -->
+  <div id="slider-container">
+      <ul class="nav nav-pills">
+        <li role="presentation"><a>Play <small>1/2</small></a></li>
+        <li role="presentation"><a><small>Speed: </small><input type="range" min="300" max="2000" step="100" value="1300"></a></li>
+        <li role="presentation"><a data-toggle="modal" data-target="#createBranch">Branch</a></li>
+        <li role="presentation"><a>Back</a></li>
+      </ul>
+        <div class="row">
+         <input id="input-slider" type="range" min="1" max="5" step="1" value="currentIndex">
+        </div>
+  </div>
+
+  <!--Create Branch Modal-->
+  <div class="modal fade" id="createBranch" tabindex="-1" role="dialog" aria-labelledby="createBranchLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="createBranchLabel">Create branch</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="diagram-title">Diagram title</label>
+                <input type="text" class="form-control" id="new-branch-title" value="New diagram">
+            </div>
+            <button id="create-go" type="button" class="btn btn-primary" data-dismiss="modal">Create and go to new diagram</button>
+            <button id="create-stay" type="button" class="btn btn-primary" data-dismiss="modal">Create and stay here</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Update title -->
   <div class="modal fade" id="mainModal" tabindex="-1" role="dialog" aria-labelledby="mainModalLabel">

@@ -204,3 +204,28 @@ module.exports.updateHistory = function(diagramId){
         diagram.save();
     });
 };
+
+module.exports.createBranch = function(req, res) {
+    diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, function(err, diagram) {
+        var index = Number(req.query.index);
+        var title = req.query.title;
+
+        if(diagram) {
+            if(title && index >= 0 && index < diagram.history.length){
+                var d = diagramModel.Diagram();
+                d.user = req.session.user._id;
+                d.data = diagram.history[index];
+                d.history = diagram.history.slice(0, index + 1);
+                d.meta.title = title;
+                d.meta.historyIndex = index;
+                d.save(function(err, diagramRes) {
+                    res.json(200, { id: diagramRes._id });
+                });
+            } else {
+                res.json(404, { error: 'Invalid parameters.' });
+            }
+        } else {
+            res.json(404, { error: 'Diagram not found.' });
+        }
+    });
+};
