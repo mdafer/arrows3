@@ -205,6 +205,7 @@ module.exports.updateHistory = function(diagramId){
     });
 };
 
+// Create new branch
 module.exports.createBranch = function(req, res) {
     diagramModel.Diagram.findOne({ _id: req.query.diagram, user: req.session.user._id }, function(err, diagram) {
         var index = Number(req.query.index);

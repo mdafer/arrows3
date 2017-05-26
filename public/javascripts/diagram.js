@@ -355,6 +355,8 @@ function render(){
             d3.select(this).attr("stroke", "rgba(255, 255, 255, 0)");
         });
 
+    updateHistoryIndex();
+
 }
 
 render();

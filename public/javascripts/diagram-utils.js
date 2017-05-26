@@ -7,6 +7,7 @@ function changeTool(tool) {
         tools[$(this).attr("id")] = false;
     });
     $("#mirrorNode").addClass("hide");
+    $(this).attr("src", "/assets/paintbrush_off.svg");
 }
 
 
@@ -46,6 +47,7 @@ function addNode(node){
         success: function(res){     
             diagramObj.data.nodes.push(res.node);
             historyIndex++;
+            maxHistoryIndex = historyIndex;
             render();
         },
         error: function(err){
@@ -58,6 +60,7 @@ function addNode(node){
 $("#copyStyle").on('click', function() {
     changeTool(this);
     if(tools.copyStyle){
+        $("#mirrorBrush").attr("src", "/assets/paintbrush_on.svg");
         $(this).children(1).append($("#mirrorNode"));
         $("#mirrorNode")
             .css({
@@ -67,6 +70,7 @@ $("#copyStyle").on('click', function() {
             })
             .removeClass("hide");
     } else {
+        $(this).attr("src", "/assets/paintbrush_off.svg");
         $("#mirrorNode").addClass("hide");
     }
 });
@@ -85,6 +89,7 @@ function updateNode(node, id) {
                 diagramObj.data.nodes[id][key] = resNode.node[key];
             });
             historyIndex++;
+            maxHistoryIndex = historyIndex;
             //diagramObj.data.nodes[id] = resNode.node;
             render();
         },
@@ -156,6 +161,7 @@ function addRelationship(startNode, endNode){
         success: function(res){
             diagramObj.data.relationships.push(res.rel);
             historyIndex++;
+            maxHistoryIndex = historyIndex;
             render();
         },
         error: function(err){
@@ -178,6 +184,7 @@ function updateRel(rel, id) {
                 diagramObj.data.relationships[id][key] = resRel.rel[key];
             });
             historyIndex++;
+            maxHistoryIndex = historyIndex;
             render();
         },
         error: function(err){
@@ -244,6 +251,7 @@ function deleteNode(id){
             diagramObj.data.relationships = rels;
             diagramObj.data.nodes.splice(id, 1);
             historyIndex++;
+            maxHistoryIndex = historyIndex;
             render();
         },
         error: function(err){
@@ -263,6 +271,7 @@ function deleteRelationship(id) {
         success: function(res){     
             diagramObj.data.relationships.splice(id, 1);
             historyIndex++;
+            maxHistoryIndex = historyIndex;
             render();
         },
         error: function(err){
@@ -299,6 +308,92 @@ function updateToIndex(index) {
         }
     });
 }
+var speed = 300;
+$("#speed").on('change', function(){
+    speed = $(this).val();
+});
+
+
+var interval;
+// Change slides
+function changeSlides(i) {
+    interval = setInterval(function(){
+        if(historyIndex + i > maxHistoryIndex || historyIndex + i < 0){
+            if(historyIndex + i < 0) {
+                $("#play-slides").removeClass("hide");
+                $("#stop-slides").addClass("hide");
+                $("#replay-slides").addClass("hide");
+            }
+            clearInterval(interval);
+            return;
+        }
+        historyIndex += i;
+        updateToIndex(historyIndex);
+    }, 2300 - speed);
+}
+
+// Toggle slider
+$("#slider").on('click', function(){
+    $("#slider-container").toggleClass("hide");
+    $("#stop-slides").addClass("hide");
+    updateHistoryIndex();
+    clearInterval(interval);
+});
+
+// Update historyIndex and maxhistoryIndex
+function updateHistoryIndex(){
+    $("#history").text((historyIndex + 1) + ' / ' + (maxHistoryIndex + 1));
+    $("#input-slider").attr("max", maxHistoryIndex + 1);
+    $("#input-slider").val(historyIndex + 1);
+    var ok = $("#stop-slides").hasClass("hide");
+    if(historyIndex == maxHistoryIndex){
+        $("#play-slides").addClass("hide");
+        $("#stop-slides").addClass("hide");
+        $("#replay-slides").removeClass("hide");
+    } else if(ok){
+        $("#play-slides").removeClass("hide");
+        $("#stop-slides").addClass("hide");
+        $("#replay-slides").addClass("hide");
+    }
+}
+
+// Change slides
+$("#input-slider").on('change', function(){
+    var index = $(this).val();
+    historyIndex = index - 1;
+    updateToIndex(historyIndex);
+});
+
+// Play slider
+$("#play-slides").on('click', function(){
+    $(this).addClass("hide");
+    $("#stop-slides").removeClass("hide");
+    changeSlides(1);
+});
+
+// Replay slider
+$("#replay-slides").on('click', function(){
+    $(this).addClass("hide");
+    $("#stop-slides").removeClass("hide");
+    historyIndex = -1;
+    changeSlides(1);
+});
+
+// Play slides backward
+$("#backward-slides").on('click', function(){
+    $("#play-slides").addClass("hide");
+    $("#replay-slides").addClass("hide");
+    $("#stop-slides").removeClass("hide");
+    changeSlides(-1);
+});
+
+// Stop slider
+$("#stop-slides").on('click', function(){
+    $(this).addClass("hide");
+    $("#play-slides").removeClass("hide");
+    clearInterval(interval);
+});
+
 
 // Create branch and stay
 $("#create-stay").on('click', function() {
@@ -447,6 +542,7 @@ var dragEndRing = function(node, index){
             mirrorNode[key] = newNode[key];
         });
         var l = diagramObj.data.nodes.length;
+        historyIndex--;
         addNode(mirrorNode);
         addRelationship(index, l);
     }

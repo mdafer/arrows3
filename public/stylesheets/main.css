@@ -17,6 +17,16 @@ html, body {
     z-index: 100;
 }
 
+#tools ul li a {
+  font-size: 17px;
+  color: black;
+}
+
+#mirrorBrush {
+  width: 20px;
+  display: inline;
+}
+
 #mirrorNode {
     display: inline-block;
     height: 24px;
@@ -34,6 +44,7 @@ html, body {
     z-index: 101;
     background-color: white;
     min-height: 100%;
+    overflow: scroll;
 }
 
 #diagram {
@@ -50,9 +61,10 @@ html, body {
 
 #slider-container {
     position: fixed;
+    z-index: 101;
     bottom: 0;
     width: 100%;
-    height: 100px;
+    height: 120px;
     background-color: #f8f8f8;
     border-top: 1px solid;
     border-color: #e7e7e7;
@@ -149,6 +161,9 @@ input[type=range]::-ms-thumb {
 }
 
 @media (min-width: 768px) { 
+    #slider-container {
+      height: 100px;
+    }
     #diagrams {
         min-width: 500px;
     }
