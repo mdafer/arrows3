@@ -11,10 +11,11 @@ html, body {
 }
 
 #tools {
-    position: fixed;
+    position: absolute;
     top: 60px;
     left:0;
     z-index: 100;
+    min-height: 620px;
 }
 
 #tools ul li a {
@@ -38,13 +39,18 @@ html, body {
 }
 
 .edit-sidebar {
-    position: fixed;
+    position: absolute;
     top: 51px;
     right: 0;
     z-index: 101;
     background-color: white;
-    min-height: 100%;
+    min-height: 620px;
+    height: 100%;
     overflow: scroll;
+}
+
+.color-cell {
+  min-width: 80px;
 }
 
 #diagram {
@@ -61,7 +67,7 @@ html, body {
 
 #slider-container {
     position: fixed;
-    z-index: 101;
+    z-index: 100;
     bottom: 0;
     width: 100%;
     height: 120px;

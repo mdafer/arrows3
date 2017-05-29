@@ -10,6 +10,8 @@ var currentNodeId = 0;
 var currentRelId = 0;
 var addNewRel = false;
 
+var colorTarget = 0;
+
 /*
     Zoom
 */

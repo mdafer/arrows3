@@ -90,7 +90,6 @@ function updateNode(node, id) {
             });
             historyIndex++;
             maxHistoryIndex = historyIndex;
-            //diagramObj.data.nodes[id] = resNode.node;
             render();
         },
         error: function(err){
@@ -121,6 +120,7 @@ $("#saveNode").on('click', function() {
 
 // Open edit node sidebar
 function editNode(node, id) {
+    $("#editRel").addClass("hide");
     $("#editNode").removeClass("hide");
     $("#caption").val(node.caption);
     $("#nodeProperties").val(node.properties);
@@ -211,6 +211,7 @@ $("#saveRel").on('click', function(){
 
 // Open edit relationship sidebar
 function editRel(rel) {
+    $("#editNode").addClass("hide");
     $("#editRel").removeClass("hide");
     $("#type").val(rel.type);
     $("#relProperties").val(rel.properties);
@@ -222,6 +223,31 @@ function editRel(rel) {
 $("#closeEditRel").on('click', function() {
     $("#editRel").addClass("hide");
 });
+
+// Set colorTarget
+$("#nodeColorBtn").on('click', function(){
+    colorTarget = 0;
+});
+$("#nodeFillBtn").on('click', function(){
+    colorTarget = 1;
+});
+$("#relFillBtn").on('click', function(){
+    colorTarget = 2;
+});
+
+// Set color
+function setColor(color){
+    if(colorTarget === 0){
+        $("#nodeColor").val(color);
+        $("#nodeColorBtn").css("color", color);
+    } else if( colorTarget === 1) {
+        $("#nodeFill").val(color);
+        $("#nodeFillBtn").css("background-color", color);
+    } else  if(colorTarget === 2){
+        $("#relFill").val(color);
+        $("#relFillBtn").css("background-color", color);
+    }
+}
 
 // Activate: Delete node
 $("#deleteElement").on('click', function() {
@@ -262,8 +288,6 @@ function deleteNode(id){
 
 // Delete Relationship
 function deleteRelationship(id) {
-    if(!tools.deleteElement) { return; }
-
     $.ajax({
         type: "DELETE",
         url: "/diagram/delete-relationship?id=" + id + "&diagram=" + diagramObj._id,
@@ -279,6 +303,9 @@ function deleteRelationship(id) {
         }
     });
 }
+$("#deleteRel").on('click', function(){
+    deleteRelationship(currentRelId);
+});
 
 // Undo
 $("#undo").on('click', function(){
@@ -308,7 +335,7 @@ function updateToIndex(index) {
         }
     });
 }
-var speed = 300;
+var speed = 1300;
 $("#speed").on('change', function(){
     speed = $(this).val();
 });

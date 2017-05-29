@@ -167,7 +167,7 @@
         <div class="input-group">
           <input type="text" class="form-control" name="color" id="nodeColor">
           <span class="input-group-btn">
-            <button class="btn btn-default" type="button" id="nodeColorBtn">Text color</button>
+            <button class="btn btn-default" type="button" id="nodeColorBtn" data-toggle="modal" data-target="#colors">Text color</button>
           </span>
         </div>
       </div>
@@ -175,11 +175,11 @@
         <div class="input-group">
           <input type="text" class="form-control" name="fill" id="nodeFill">
           <span class="input-group-btn">
-            <button class="btn btn-default" type="button" id="nodeFillBtn">Fill color</button>
+            <button class="btn btn-default" type="button" id="nodeFillBtn" data-toggle="modal" data-target="#colors">Fill color</button>
           </span>
         </div>
       </div>
-      <button type="button" class="btn btn-danger">Delete</button>
+      <button type="button" id="deleteNode" class="btn btn-danger">Delete</button>
       <button type="button" id="saveNode" class="btn btn-primary pull-right">Save</button>
     </form>
   </div>
@@ -200,11 +200,11 @@
         <div class="input-group">
           <input type="text" class="form-control" name="fill" id="relFill">
           <span class="input-group-btn">
-            <button class="btn btn-default" type="button" id="relFillBtn">Fill color</button>
+            <button class="btn btn-default" type="button" id="relFillBtn" data-toggle="modal" data-target="#colors">Fill color</button>
           </span>
         </div>
       </div>
-      <button type="button" class="btn btn-danger">Delete</button>
+      <button type="button" id="deleteRel" class="btn btn-danger">Delete</button>
       <button type="button" id="saveRel" class="btn btn-primary pull-right">Save</button>
     </form>
   </div>
@@ -223,7 +223,7 @@
           </a>
         </li>
         <li role="presentation"><a style="padding-right: 0;">Speed:</a></li>
-        <li role="presentation"><a><input type="range" min="300" max="2000" step="100" value="1300"></a></li>
+        <li role="presentation"><a><input id="speed" type="range" min="300" max="2000" step="100" value="1300"></a></li>
         <li role="presentation"><a data-toggle="modal" data-target="#createBranch"><i class="fa fa-code-fork" aria-hidden="true"></i></a></li>
         <li role="presentation"><a id="backward-slides"><i id="stop-slides" class="fa fa-backward" aria-hidden="true"></i> </a></li>
       </ul>
@@ -272,10 +272,54 @@
       </div>
     </div>
   </div>
+
+
+  <% colors = [
+        ["Pink", "LightPink", "HotPink", "DeepPink", "PaleVioletRed", "MediumVioletRed"],
+        ["Lavender", "Thistle", "Plum", "Orchid", "Violet", "Fuchsia", "Magenta", "MediumOrchid", "DarkOrchid", "DarkViolet", "BlueViolet", "DarkMagenta", "Purple", "MediumPurple", "MediumSlateBlue", "SlateBlue", "DarkSlateBlue", "RebeccaPurple", "Indigo"],
+        ["LightSalmon", "Salmon", "DarkSalmon", "LightCoral", "IndianRed", "Crimson", "Red", "FireBrick", "DarkRed"],
+        ["Orange", "DarkOrange", "Coral", "Tomato", "OrangeRed"],
+        ["Gold", "Yellow", "LightYellow", "LemonChiffon", "LightGoldenRodYellow", "PapayaWhip", "Moccasin", "PeachPuff", "PaleGoldenRod", "Khaki", "DarkKhaki"],
+        ["GreenYellow", "Chartreuse", "LawnGreen", "Lime", "LimeGreen", "PaleGreen", "LightGreen", "MediumSpringGreen", "SpringGreen", "MediumSeaGreen", "SeaGreen", "ForestGreen", "Green", "DarkGreen", "YellowGreen", "OliveDrab", "DarkOliveGreen", "MediumAquaMarine", "DarkSeaGreen", "LightSeaGreen", "DarkCyan", "Teal"],
+        ["Aqua", "Cyan", "LightCyan", "PaleTurquoise", "Aquamarine", "Turquoise", "MediumTurquoise", "DarkTurquoise"],
+        ["CadetBlue", "SteelBlue", "LightSteelBlue", "LightBlue", "PowderBlue", "LightSkyBlue", "SkyBlue", "CornflowerBlue", "DeepSkyBlue", "DodgerBlue", "RoyalBlue", "Blue", "MediumBlue", "DarkBlue", "Navy", "MidnightBlue"],
+        ["Cornsilk", "BlanchedAlmond", "Bisque", "NavajoWhite", "Wheat", "BurlyWood", "Tan", "RosyBrown", "SandyBrown", "GoldenRod", "DarkGoldenRod", "Peru", "Chocolate", "Olive", "SaddleBrown", "Sienna", "Brown", "Maroon"],
+        ["White", "Snow", "HoneyDew", "MintCream", "Azure", "AliceBlue", "GhostWhite", "WhiteSmoke", "SeaShell", "Beige", "OldLace", "FloralWhite", "Ivory", "AntiqueWhite", "Linen", "LavenderBlush", "MistyRose"],
+        ["Gainsboro", "LightGray", "Silver", "DarkGray", "DimGray", "Gray", "LightSlateGray", "SlateGray", "DarkSlateGray", "Black"]
+    ];
+  %>
+  <!--Colors Modal-->
+  <div class="modal fade" id="colors" tabindex="-1" role="dialog" aria-labelledby="colorsLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <table class="table">
+            <% for(g in colors) {
+                for(c in colors[g]) {%>
+                  <tr onclick="setColor('<%= colors[g][c] %>')" data-dismiss="modal">
+                    <td><%= colors[g][c] %></td>
+                    <td style="background-color: <%= colors[g][c] %>;" class="color-cell"></td>
+                  </tr>
+            <% } 
+            } %>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     var diagramObj = <%- JSON.stringify(diagram) %>
     var mirrorNode = <%- JSON.stringify(node) %>
     var historyIndex = <%- diagram.meta.historyIndex; %>
     var maxHistoryIndex = <%- diagram.history.length - 1; %>
   </script>
-<% include footer %>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+
+  <script src="/javascripts/dashboard.js"></script>
+  <script src="/javascripts/diagram-utils.js"></script>
+  <script src="/javascripts/diagram.js"></script>
