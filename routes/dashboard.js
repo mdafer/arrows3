@@ -5,10 +5,15 @@ var exportData = require('../config/export');
 // Redirect to diagram
 module.exports.view = function(req, res, next) {
     userModel.User.findOne({ _id: req.session.user._id }, 'currentDiagram', function(err, user) {
-        // TODO: Check if currentDiagram exist
 
         if(user.currentDiagram) {
-            res.redirect('/dashboard/' + user.currentDiagram);
+            diagramModel.Diagram.findOne({ _id: user.currentDiagram,}, '_id', function(err, diagram) {
+                if(diagram){
+                    res.redirect('/dashboard/' + user.currentDiagram);
+                } else {
+                    module.exports.addDiagram(req, res, next);
+                }
+            });
         } else {
             module.exports.addDiagram(req, res, next);
         }

@@ -69,6 +69,10 @@ function deleteDiagram(diagram, currentDiagram){
 $(".delete-diagram").on("click", function(){
     event.stopPropagation();
     var diagram = $(this).parent().parent().attr("id");
+    var d = $("#diagrams table tbody tr");
+    if(d.length === 2){
+        d.children("td:last-child").hide();
+    }
     deleteDiagram(diagram, diagramObj._id);
 });
 
@@ -110,9 +114,9 @@ function sortDiagrams(col, asc){
 // Filter diagrams
 $("#diagram-filter").on('keyup', function(){
     filterDigrams(this.value);
-})
+});
 function filterDigrams(value){
-    let reg = new RegExp(value.split('').join('\\w*'), 'i');
+    var reg = new RegExp(value.split('').join('\\w*'), 'i');
 
     $("#diagram-list").children().each(function(){
         var title = $(this).children()[0].innerHTML;

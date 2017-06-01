@@ -256,7 +256,6 @@ $("#deleteElement").on('click', function() {
 
 // Delete node
 function deleteNode(id){
-    if(!tools.deleteElement) { return; }
 
     var rels = diagramObj.data.relationships.filter(function(rel){
         var res = rel.startNode != id && rel.endNode != id;
@@ -286,6 +285,11 @@ function deleteNode(id){
     });
 }
 
+$("#deleteNode").on('click', function(){
+    $("#editNode").addClass("hide");
+    deleteNode(currentNodeId);
+});
+
 // Delete Relationship
 function deleteRelationship(id) {
     $.ajax({
@@ -304,8 +308,10 @@ function deleteRelationship(id) {
     });
 }
 $("#deleteRel").on('click', function(){
+    $("#editRel").addClass("hide");
     deleteRelationship(currentRelId);
 });
+
 
 // Undo
 $("#undo").on('click', function(){
